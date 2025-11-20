@@ -1,16 +1,31 @@
-# React + Vite
+# 📚 BookVerse - Catálogo de Livros
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Disciplina:** Interfaces Web 2024-2025  
+**Aluno:** Constança Azevedo  
+**Número:** AXXXXX
 
-Currently, two official plugins are available:
+## 🎯 Objetivo
+Catálogo de livros com frontoffice público e backoffice administrativo desenvolvido em ReactJS.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Funcionalidades
+- ✅ Frontoffice com listagem de livros
+- ⏳ Backoffice com CRUD de livros
+- ⏳ Sistema de comentários
+- ⏳ Design responsivo
 
-## React Compiler
+## 🛠 Tecnologias
+- ReactJS
+- JSON Server (API REST)
+- Axios
+- CSS Responsivo
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📦 Instalação
+```bash
+# Instalar dependências
+npm install
 
-## Expanding the ESLint configuration
+# Executar API JSON Server (Terminal 1)
+json-server --watch db.json --port 3001
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Executar React App (Terminal 2)
+npm run dev
