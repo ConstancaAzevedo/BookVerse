@@ -1,0 +1,45 @@
+{
+  "livros": [
+    {
+      "id": 1,
+      "titulo": "The Maze Runner",
+      "autor": "James Dashner",
+      "descricao": "The Maze Runner is an exciting adventure story about magic and mystery.",
+      "imagem": "https://www.presenca.pt/cdn/shop/products/image-1_c8c8da0d-75c8-4fcb-857f-b6029d200ebd_1024x1024.jpg?v=1604727304"
+    },
+    {
+      "id": 2,
+      "titulo": "Dom Casmurro",
+      "autor": "Machado de Assis", 
+      "descricao": "Um clássico da literatura brasileira que explora ciúmes e relações humanas.",
+      "imagem": "https://m.media-amazon.com/images/I/51BxlPc6-sL._SY445_SX342_QL70_FMwebp_.jpg"
+    },
+    {
+      "id": 3,
+      "titulo": "1984",
+      "autor": "George Orwell",
+      "descricao": "Romance distópico sobre controle totalitário e vigilância governamental.",
+      "imagem": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1657781256i/61439040.jpg"
+    }
+  ],
+  "comentarios": [
+    {
+      "id": 1,
+      "livroId": 1,
+      "autor": "João",
+      "comentario": "Gostei muito deste livro! A aventura é emocionante."
+    },
+    {
+      "id": 2, 
+      "livroId": 1,
+      "autor": "Maria",
+      "comentario": "Recomendo a todos os amantes de fantasia."
+    },
+    {
+      "id": 3,
+      "livroId": 2,
+      "autor": "Carlos",
+      "comentario": "Machado de Assis é sempre incrível!"
+    }
+  ]
+} 
