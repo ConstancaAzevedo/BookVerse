@@ -1,73 +1,60 @@
 {
-  "livros": [
+  "books": [
     {
       "id": 1,
-      "titulo": "The Maze Runner",
-      "autor": "James Dashner",
-      "descricao": "The Maze Runner is an exciting adventure story about magic and mystery.",
-      "imagem": "https://www.presenca.pt/cdn/shop/products/image-1_c8c8da0d-75c8-4fcb-857f-b6029d200ebd_1024x1024.jpg?v=1604727304"
+      "title": "Harry Potter e a Pedra Filosofal",
+      "author": "J.K. Rowling",
+      "year": 1997,
+      "genre": "Fantasia",
+      "image": "https://img.travessa.pt/livro/GR/40/4028fd28-07c2-4669-8101-d355bca6bc06.jpg",
+      "description": "Primeiro livro da saga Harry Potter"
     },
     {
       "id": 2,
-      "titulo": "Dom Casmurro",
-      "autor": "Machado de Assis", 
-      "descricao": "Um clássico da literatura brasileira que explora ciúmes e relações humanas.",
-      "imagem": "https://m.media-amazon.com/images/I/51BxlPc6-sL._SY445_SX342_QL70_FMwebp_.jpg"
+      "title": "Harry Potter e a Câmara dos Segredos",
+      "author": "J.K. Rowling", 
+      "year": 1998,
+      "genre": "Fantasia",
+      "image": "https://www.presenca.pt/cdn/shop/products/image-1_85c1dfac-79f9-431e-b96b-7ab26d9de938_grande.jpg?v=1636630533",
+      "description": "Segundo livro da saga Harry Potter"
     },
     {
       "id": 3,
-      "titulo": "1984",
-      "autor": "George Orwell",
-      "descricao": "Romance distópico sobre controle totalitário e vigilância governamental.",
-      "imagem": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1657781256i/61439040.jpg"
-    },
-    {
-      "id": 4,
-      "titulo": "Harry Potter e a Pedra Filosofal",
-      "autor": "J.K. Rowling",
-      "descricao": "O primeiro livro da famosa série Harry Potter.",
-      "imagem": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1550337333i/15881.jpg"
-    },
-    {
-      "id": 5,
-      "titulo": "O Senhor dos Anéis",
-      "autor": "J.R.R. Tolkien",
-      "descricao": "Uma épica aventura na Terra Média.",
-      "imagem": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1566425108i/33.jpg"
-    },
-    {
-      "id": 6,
-      "titulo": "Orgulho e Preconceito",
-      "autor": "Jane Austen",
-      "descricao": "Romance clássico sobre amor e sociedade.",
-      "imagem": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1320399351i/1885.jpg"
-    },
-    {
-      "id": 7,
-      "titulo": "O Pequeno Príncipe",
-      "autor": "Antoine de Saint-Exupéry",
-      "descricao": "Conto filosófico para todas as idades.",
-      "imagem": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1367545443i/157993.jpg"
+      "title": "Orgulho e Preconceito",
+      "author": "Jane Austen",
+      "year": 1813,
+      "genre": "Romance",
+      "image": "https://www.presenca.pt/cdn/shop/products/image-1_22ec9f6b-b9cc-4f77-adf2-aaab91e54920_1024x1024.jpg?v=1604974222",
+      "description": "Clássico da literatura inglesa"
     }
   ],
-  "comentarios": [
+  "comments": [
     {
       "id": 1,
-      "livroId": 1,
-      "autor": "João",
-      "comentario": "Gostei muito deste livro! A aventura é emocionante."
+      "bookId": 1,
+      "userName": "Maria Silva",
+      "userEmail": "maria@email.com",
+      "text": "Adorei este livro! A história é cativante desde o início.",
+      "rating": 5,
+      "date": "2025-01-10"
     },
     {
-      "id": 2, 
-      "livroId": 1,
-      "autor": "Maria",
-      "comentario": "Recomendo a todos os amantes de fantasia."
+      "id": 2,
+      "bookId": 1,
+      "userName": "João Santos",
+      "userEmail": "joao@email.com",
+      "text": "Clássico obrigatório para todos os amantes de fantasia.",
+      "rating": 4,
+      "date": "2025-01-12"
     },
     {
       "id": 3,
-      "livroId": 2,
-      "autor": "Carlos",
-      "comentario": "Machado de Assis é sempre incrível!"
+      "bookId": 2,
+      "userName": "Ana Costa",
+      "userEmail": "ana@email.com",
+      "text": "Segundo livro tão bom quanto o primeiro!",
+      "rating": 5,
+      "date": "2025-01-15"
     }
   ]
-} 
+}
