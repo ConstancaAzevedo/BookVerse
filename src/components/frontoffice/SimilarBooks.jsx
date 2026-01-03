@@ -1,36 +1,50 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getSimilarBooks } from '../services/api';
+import { getSimilarBooks } from '../../services/api';
 import './SimilarBooks.css';
-
-/*Livros Similares*/
 
 function SimilarBooks({ currentBook }) {
   const [similarBooks, setSimilarBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadSimilarBooks = async () => {
       try {
-        setLoading(true);
-        const books = await getSimilarBooks(currentBook, 3);
-        setSimilarBooks(books);
+        if (!currentBook || !currentBook.id) {
+          console.log('⚠️ SimilarBooks: currentBook não tem ID');
+          setLoading(false);
+          return;
+        }
+
+        console.log(`🔍 SimilarBooks: buscando similares para livro ID:`, currentBook.id);
+        console.log(`🔍 Livro atual:`, currentBook.title);
+
+        const similar = await getSimilarBooks(currentBook.id);
+        setSimilarBooks(similar);
       } catch (error) {
-        console.error('Erro ao carregar livros similares:', error);
+        console.error('❌ Erro ao carregar livros similares:', error);
+        setError('Não foi possível carregar livros similares');
       } finally {
         setLoading(false);
       }
     };
 
-    if (currentBook) {
-      loadSimilarBooks();
-    }
-  }, [currentBook]);
+    loadSimilarBooks();
+  }, [currentBook]); // Dependência: currentBook
 
   if (loading) {
     return (
       <div className="similar-books-loading">
         <p>A carregar livros similares...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="similar-books-error">
+        <p>{error}</p>
       </div>
     );
   }
@@ -43,13 +57,13 @@ function SimilarBooks({ currentBook }) {
     <div className="similar-books">
       <h3>📚 Livros Similares</h3>
       <p className="similar-books-subtitle">Outros livros que poderá gostar</p>
-      
+
       <div className="similar-books-grid">
         {similarBooks.map((book) => (
           <Link to={`/book/${book.id}`} key={book.id} className="similar-book-card">
             <div className="similar-book-cover">
-              <img 
-                src={book.image || 'https://via.placeholder.com/100x150/cccccc/ffffff?text=No+Img'} 
+              <img
+                src={book.image || 'https://via.placeholder.com/100x150/cccccc/ffffff?text=No+Img'}
                 alt={book.title}
                 onError={(e) => {
                   e.target.src = 'https://via.placeholder.com/100x150/cccccc/ffffff?text=No+Img';

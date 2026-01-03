@@ -1,115 +1,36 @@
-const API_URL = "http://localhost:3001";
+import { SHEETY_CONFIG } from './sheetyConfig';
 
-// DADOS MOCK DE LIVROS
-const MOCK_BOOKS = {
-  1: {
-    id: 1,
-    title: 'Harry Potter e a Pedra Filosofal',
-    author: 'J.K. Rowling',
-    description: 'O primeiro livro da saga Harry Potter. Harry descobre que é um bruxo e inicia sua jornada em Hogwarts.',
-    cover: 'https://www.presenca.pt/cdn/shop/products/image-1_f70b8d09-28e7-49d0-9273-a196230a7638_300x.jpg?v=1635288216',
-    image: 'https://www.presenca.pt/cdn/shop/products/image-1_f70b8d09-28e7-49d0-9273-a196230a7638_300x.jpg?v=1635288216',
-    rating: 4.8,
-    pages: 223,
-    year: 1997,
-    genre: 'Fantasia'
-  },
-  2: {
-    id: 2,
-    title: '1984',
-    author: 'George Orwell',
-    description: 'Um clássico da literatura distópica sobre vigilância totalitária e controle mental.',
-    cover: 'https://static.fnac-static.com/multimedia/Images/PT/NR/f8/9e/0d/892664/1507-1/tsp20150715100812/1984.jpg',
-    image: 'https://static.fnac-static.com/multimedia/Images/PT/NR/f8/9e/0d/892664/1507-1/tsp20150715100812/1984.jpg',
-    rating: 4.7,
-    pages: 328,
-    year: 1949,
-    genre: 'Ficção Científica'
-  },
-  3: {
-    id: 3,
-    title: 'O Senhor dos Anéis',
-    author: 'J.R.R. Tolkien',
-    description: 'A trilogia épica da Terra Média, seguindo a jornada de Frodo para destruir o Um Anel.',
-    cover: 'https://img.wook.pt/images/o-senhor-dos-aneis-i-j-r-r-tolkien/MXw2NTQ0N3w5NTUxNHwxNTI4OTY3Nzc2MDAw/500x',
-    image: 'https://img.wook.pt/images/o-senhor-dos-aneis-i-j-r-r-tolkien/MXw2NTQ0N3w5NTUxNHwxNTI4OTY3Nzc2MDAw/500x',
-    rating: 4.9,
-    pages: 1178,
-    year: 1954,
-    genre: 'Fantasia'
-  },
-  4: {
-    id: 4,
-    title: 'Orgulho e Preconceito',
-    author: 'Jane Austen',
-    description: 'Romance clássico sobre Elizabeth Bennet e sua relação com o sr. Darcy.',
-    cover: 'https://www.presenca.pt/cdn/shop/products/image-1_22ec9f6b-b9cc-4f77-adf2-aaab91e54920_1024x1024.jpg?v=1604974222',
-    image: 'https://www.presenca.pt/cdn/shop/products/image-1_22ec9f6b-b9cc-4f77-adf2-aaab91e54920_1024x1024.jpg?v=1604974222',
-    rating: 4.6,
-    pages: 432,
-    year: 1813,
-    genre: 'Romance'
-  },
-  5: {
-    id: 5,
-    title: 'O Grande Gatsby',
-    author: 'F. Scott Fitzgerald',
-    description: 'História sobre a busca do Sonho Americano durante os anos 20.',
-    cover: 'https://imgv2-1-f.scribdassets.com/img/word_document/485318710/original/fcac25551d/1?v=1',
-    image: 'https://imgv2-1-f.scribdassets.com/img/word_document/485318710/original/fcac25551d/1?v=1',
-    rating: 4.5,
-    pages: 218,
-    year: 1925,
-    genre: 'Clássico'
-  },
-  6: {
-    id: 6,
-    title: 'Moby Dick',
-    author: 'Herman Melville',
-    description: 'A caça obsessiva do capitão Ahab à baleia branca.',
-    cover: 'https://img.wook.pt/images/moby-dick-herman-melville/MXwxOTI3NjgyMHwxNTA4MTc0MHwxNDkxOTI1ODkwMDAw/500x',
-    image: 'https://img.wook.pt/images/moby-dick-herman-melville/MXwxOTI3NjgyMHwxNTA4MTc0MHwxNDkxOTI1ODkwMDAw/500x',
-    rating: 4.4,
-    pages: 585,
-    year: 1851,
-    genre: 'Aventura'
-  },
-  7: {
-    id: 7,
-    title: 'Crime e Castigo',
-    author: 'Fiódor Dostoiévski',
-    description: 'Estudo psicológico de um estudante que comete um assassinato.',
-    cover: 'https://www.relogiodagua.pt/wp-content/uploads/2023/11/9789896410803-scaled.jpg',
-    image: 'https://www.relogiodagua.pt/wp-content/uploads/2023/11/9789896410803-scaled.jpg',
-    rating: 4.7,
-    pages: 671,
-    year: 1866,
-    genre: 'Filosófico'
-  },
-  8: {
-    id: 8,
-    title: 'A Metamorfose',
-    author: 'Franz Kafka',
-    description: 'Gregor Samsa acorda transformado num inseto monstruoso.',
-    cover: 'https://www.presenca.pt/cdn/shop/products/image-1_769b8631-d1ab-4f47-b2d1-1738cb25d507_1024x1024.jpg?v=1604750759',
-    image: 'https://www.presenca.pt/cdn/shop/products/image-1_769b8631-d1ab-4f47-b2d1-1738cb25d507_1024x1024.jpg?v=1604750759',
-    rating: 4.3,
-    pages: 201,
-    year: 1915,
-    genre: 'Ficção Absurda'
-  }
+const BASE_URL = SHEETY_CONFIG.API_BASE;
+const headers = {
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${SHEETY_CONFIG.API_KEY}`
 };
 
-// CONVERTE O OBJETO PARA ARRAY
-const ALL_BOOKS_ARRAY = Object.values(MOCK_BOOKS);
+// Função auxiliar para transformar dados do Sheety
+const transformBookFromSheety = (sheetyBook) => {
+  return {
+    id: sheetyBook.id - 1, // ID do sistema (1, 2, 3...)
+    sheetyId: sheetyBook.id, // ID original do Sheety (2, 3, 4...)
+    title: sheetyBook.title,
+    author: sheetyBook.author,
+    description: sheetyBook.description,
+    genre: sheetyBook.genre,
+    cover: sheetyBook.cover,
+    image: sheetyBook.image || sheetyBook.cover,
+    rating: parseFloat(sheetyBook.rating) || 0,
+    pages: parseInt(sheetyBook.pages) || 0,
+    year: parseInt(sheetyBook.year) || 0
+  };
+};
 
-// API DE LIVROS
 export const bookApi = {
   getBooks: async (page = 1, limit = 6, search = "") => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300)); // Simular delay
+      const response = await fetch(`${BASE_URL}/books`, { headers });
+      const data = await response.json();
+      const allBooks = data.books.map(transformBookFromSheety);
 
-      let filteredBooks = ALL_BOOKS_ARRAY;
+      let filteredBooks = allBooks;
 
       // Filtrar se houver pesquisa
       if (search && search.trim() !== "") {
@@ -148,116 +69,149 @@ export const bookApi = {
     }
   },
 
-  // ADICIONA A FUNÇÃO getBookById AO OBJETO bookApi
   getBookById: async (bookId) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      console.log(`🔍 getBookById CHAMADO com:`, bookId);
+      console.log(`🔍 Tipo de bookId:`, typeof bookId);
+      console.log(`🔍 bookId toString:`, String(bookId));
 
-      const book = MOCK_BOOKS[bookId];
-
-      if (!book) {
-        throw new Error('Livro não encontrado');
+      // Se bookId for um objeto, tenta extrair o ID
+      let actualBookId = bookId;
+      if (typeof bookId === 'object' && bookId !== null) {
+        console.log(`⚠️ bookId é objeto! Extraindo...`, bookId);
+        actualBookId = bookId.id || bookId._id || bookId.bookId;
+        console.log(`🔄 ID extraído:`, actualBookId);
       }
 
-      return book;
+      // Converte para número
+      actualBookId = parseInt(actualBookId);
+
+      if (isNaN(actualBookId)) {
+        console.error(`❌ bookId inválido:`, bookId);
+        throw new Error(`ID de livro inválido: ${bookId}`);
+      }
+
+      console.log(`🔍 Buscando livro ID numérico ${actualBookId}...`);
+
+      // 1. Primeiro busca TODOS os livros
+      const response = await fetch(`${BASE_URL}/books`, { headers });
+      const data = await response.json();
+
+      console.log(`📊 Total de livros disponíveis:`, data.books?.length || 0);
+
+      if (!data.books || data.books.length === 0) {
+        throw new Error('Nenhum livro encontrado na API');
+      }
+
+      // 2. Encontra o livro pelo ID correto
+      // CORREÇÃO: Use actualBookId, não bookId!
+      let foundBook = null;
+
+      if (data.books) {
+        // A: Busca pelo ID do sistema (subtraindo 1 do ID do Sheety)
+        foundBook = data.books.find(b => (b.id - 1) == actualBookId); // <-- CORREÇÃO AQUI
+
+        // B: Se não encontrar, tenta buscar pelo ID do Sheety diretamente
+        if (!foundBook) {
+          console.log(`🔄 Tentando buscar pelo ID do Sheety: ${actualBookId}`);
+          foundBook = data.books.find(b => b.id == actualBookId);
+        }
+      }
+
+      console.log(`🔍 Livro encontrado:`, foundBook);
+
+      if (!foundBook) {
+        console.error(`❌ Livro ID ${actualBookId} não encontrado. Livros disponíveis:`,
+          data.books?.map(b => ({
+            sheetyId: b.id,
+            systemId: b.id - 1,  // ID do sistema
+            title: b.title
+          })));
+        throw new Error(`Livro ID ${actualBookId} não encontrado`);
+      }
+
+      return transformBookFromSheety(foundBook);
     } catch (error) {
-      console.error('Erro ao buscar livro:', error);
+      console.error('❌ Erro ao buscar livro:', error);
       throw error;
     }
   },
 
-
-  // Get ALL books (sem paginação, para admin)
   getAllBooks: async () => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return ALL_BOOKS_ARRAY;
+      const response = await fetch(`${BASE_URL}/books`, { headers });
+      const data = await response.json();
+      return data.books.map(transformBookFromSheety);
     } catch (error) {
       console.error("Erro ao buscar todos os livros:", error);
       throw error;
     }
   },
 
-  // Create book
   createBook: async (bookData) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // Gerar novo ID (simulação)
-      const newId = Math.max(...Object.keys(MOCK_BOOKS).map(Number)) + 1;
-
-      const newBook = {
-        id: newId,
-        ...bookData,
-        cover: bookData.cover || 'https://via.placeholder.com/300x450/cccccc/ffffff?text=Sem+Capa',
-        image: bookData.image || bookData.cover || 'https://via.placeholder.com/300x450/cccccc/ffffff?text=Sem+Capa'
+      const sheetyBook = {
+        title: bookData.title,
+        author: bookData.author,
+        description: bookData.description,
+        genre: bookData.genre,
+        cover: bookData.cover,
+        image: bookData.image || bookData.cover,
+        rating: bookData.rating?.toString() || '0',
+        pages: bookData.pages?.toString() || '0',
+        year: bookData.year?.toString() || '0'
       };
 
-      // Adicionar ao MOCK_BOOKS
-      MOCK_BOOKS[newId] = newBook;
-      ALL_BOOKS_ARRAY.push(newBook);
+      const response = await fetch(`${BASE_URL}/books`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ book: sheetyBook })
+      });
 
-      console.log('Livro criado:', newBook);
-      return newBook;
+      const data = await response.json();
+      return transformBookFromSheety(data.book);
     } catch (error) {
       console.error("Erro ao criar livro:", error);
       throw error;
     }
   },
 
-  // Update book
   updateBook: async (id, bookData) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const bookId = parseInt(id);
-      if (!MOCK_BOOKS[bookId]) {
-        throw new Error('Livro não encontrado');
-      }
-
-      const updatedBook = {
-        ...MOCK_BOOKS[bookId],
-        ...bookData,
-        id: bookId // Garantir que o ID não muda
+      const sheetyBook = {
+        title: bookData.title,
+        author: bookData.author,
+        description: bookData.description,
+        genre: bookData.genre,
+        cover: bookData.cover,
+        image: bookData.image || bookData.cover,
+        rating: bookData.rating?.toString() || '0',
+        pages: bookData.pages?.toString() || '0',
+        year: bookData.year?.toString() || '0'
       };
 
-      // Atualizar nos mocks
-      MOCK_BOOKS[bookId] = updatedBook;
+      const response = await fetch(`${BASE_URL}/books/${id}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ book: sheetyBook })
+      });
 
-      // Atualizar no array
-      const index = ALL_BOOKS_ARRAY.findIndex(b => b.id === bookId);
-      if (index !== -1) {
-        ALL_BOOKS_ARRAY[index] = updatedBook;
-      }
-
-      console.log('Livro atualizado:', updatedBook);
-      return updatedBook;
+      const data = await response.json();
+      return transformBookFromSheety(data.book);
     } catch (error) {
       console.error("Erro ao atualizar livro:", error);
       throw error;
     }
   },
 
-  // Delete book
   deleteBook: async (id) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const response = await fetch(`${BASE_URL}/books/${id}`, {
+        method: 'DELETE',
+        headers
+      });
 
-      const bookId = parseInt(id);
-      if (!MOCK_BOOKS[bookId]) {
-        throw new Error('Livro não encontrado');
-      }
-
-      // Remover dos mocks
-      delete MOCK_BOOKS[bookId];
-
-      // Remover do array
-      const index = ALL_BOOKS_ARRAY.findIndex(b => b.id === bookId);
-      if (index !== -1) {
-        ALL_BOOKS_ARRAY.splice(index, 1);
-      }
-
-      console.log('Livro eliminado:', bookId);
+      await response.json();
       return { success: true, message: 'Livro eliminado com sucesso' };
     } catch (error) {
       console.error("Erro ao eliminar livro:", error);
@@ -266,61 +220,31 @@ export const bookApi = {
   }
 };
 
-// FUNÇÃO INDIVIDUAL getBookById (mantém compatibilidade)
-export const getBookById = async (bookId) => {
-  return await bookApi.getBookById(bookId);
-};
-
-// LIVROS SIMILARES
-export const getSimilarBooks = async (bookId) => {
-  try {
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    const currentBook = MOCK_BOOKS[bookId];
-    if (!currentBook) return [];
-
-    // Encontrar livros com o mesmo gênero
-    const similar = ALL_BOOKS_ARRAY.filter(book =>
-      book.id !== bookId &&
-      book.genre === currentBook.genre
-    ).slice(0, 3); // Limitar a 3 livros
-
-    return similar;
-  } catch (error) {
-    console.error('Erro ao buscar livros similares:', error);
-    return [];
-  }
-};
-
 // API DE COMENTÁRIOS
 export const commentApi = {
   getCommentsByBook: async (bookId) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      const response = await fetch(`${BASE_URL}/comments`, { headers });
+      const data = await response.json();
+      const allComments = data.comments || [];
 
-      // Comentários mock
-      const mockComments = {
-        1: [
-          { id: 1, bookId: 1, user: 'João Silva', text: 'Adorei este livro!', date: '2024-01-15', rating: 5 },
-          { id: 2, bookId: 1, user: 'Maria Santos', text: 'Muito bom para iniciantes na leitura.', date: '2024-01-10', rating: 4 },
-          { id: 3, bookId: 1, user: 'Carlos Oliveira', text: 'Clássico imperdível!', date: '2024-01-05', rating: 5 }
-        ],
-        2: [
-          { id: 4, bookId: 2, user: 'Ana Pereira', text: 'Assustadoramente atual.', date: '2024-01-12', rating: 5 },
-          { id: 5, bookId: 2, user: 'Rui Costa', text: 'Leitura obrigatória.', date: '2024-01-08', rating: 4 }
-        ],
-        3: [
-          { id: 6, bookId: 3, user: 'Sofia Almeida', text: 'Épico! Melhor fantasia de sempre.', date: '2024-01-20', rating: 5 }
-        ],
-        4: [
-          { id: 7, bookId: 4, user: 'Luís Fernandes', text: 'Romance atemporal.', date: '2024-01-18', rating: 5 }
-        ],
-        5: [
-          { id: 8, bookId: 5, user: 'Teresa Lima', text: 'Retrato perfeito de uma época.', date: '2024-01-14', rating: 4 }
-        ]
-      };
+      const numericBookId = parseInt(bookId);
 
-      return mockComments[bookId] || [];
+      // Comentários usam IDs do sistema (1, 2, 3...)
+      const bookComments = allComments
+        .filter(comment => parseInt(comment.bookId) === numericBookId)
+        .map(comment => ({
+          id: comment.id,
+          bookId: parseInt(comment.bookId),
+          user: comment.user,
+          text: comment.text,
+          date: comment.date,
+          rating: parseInt(comment.rating) || 0
+        }));
+
+      console.log(`📝 ${bookComments.length} comentários para livro ${numericBookId}`);
+      return bookComments;
+
     } catch (error) {
       console.error("Erro ao buscar comentários:", error);
       return [];
@@ -329,20 +253,59 @@ export const commentApi = {
 
   addComment: async (commentData) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // Simular salvamento
-      const newComment = {
-        id: Date.now(),
-        ...commentData,
-        date: new Date().toISOString().split('T')[0]
+      const sheetyComment = {
+        bookId: commentData.bookId.toString(),
+        user: commentData.user,
+        text: commentData.text,
+        date: commentData.date || new Date().toISOString().split('T')[0],
+        rating: commentData.rating?.toString() || '0'
       };
 
-      console.log('Mock: Comentário adicionado', newComment);
-      return newComment;
+      const response = await fetch(`${BASE_URL}/comments`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ comment: sheetyComment })
+      });
+
+      const data = await response.json();
+      return {
+        id: data.comment.id,
+        bookId: parseInt(data.comment.bookId),
+        user: data.comment.user,
+        text: data.comment.text,
+        date: data.comment.date,
+        rating: parseInt(data.comment.rating) || 0
+      };
     } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
       throw error;
     }
+  }
+};
+
+// Funções auxiliares mantêm compatibilidade
+export const getBookById = async (bookId) => {
+  return await bookApi.getBookById(bookId);
+};
+
+export const getSimilarBooks = async (bookId) => {
+  try {
+    console.log(`🔍 Buscando livros similares para ID ${bookId}...`);
+
+    const currentBook = await bookApi.getBookById(bookId);
+    const allBooks = await bookApi.getAllBooks();
+
+    const similar = allBooks
+      .filter(book =>
+        book.id !== bookId &&
+        book.genre === currentBook.genre
+      )
+      .slice(0, 3);
+
+    console.log(`✅ Encontrados ${similar.length} livros similares`);
+    return similar;
+  } catch (error) {
+    console.error('❌ Erro ao buscar livros similares:', error);
+    return [];
   }
 };

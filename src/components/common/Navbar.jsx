@@ -15,11 +15,11 @@ function Navbar() {
       const savedAuth = localStorage.getItem('bookverse_admin');
       setIsLoggedIn(savedAuth === 'true');
     };
-    
+
     checkAuth();
     // Verificar a cada mudança de storage (se outro tab fizer logout)
     window.addEventListener('storage', checkAuth);
-    
+
     return () => window.removeEventListener('storage', checkAuth);
   }, []);
 
@@ -42,14 +42,19 @@ function Navbar() {
       <div className="navbar-container">
         {/* Logo/Brand */}
         <div className="navbar-brand">
-          <Link to="/" className="navbar-logo"> 
-            <img src="src\imagens\bookverse_logo.png" alt="BookVerse Logo" className="navbar-logo-image" /> 
-            BookVerse 
+          <Link to="/" className="navbar-logo">
+            <img
+              src="src\imagens\bookverse_logo.png"
+              alt="BookVerse Logo"
+              className="navbar-logo-image"
+              style={{ width: '40px', height: '40px' }}
+            />
+            BookVerse
           </Link>
         </div>
 
         {/* Menu Mobile Toggle */}
-        <button 
+        <button
           className="menu-toggle"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle menu"

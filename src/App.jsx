@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import Navbar from './components/Navbar'; // ⭐ ADICIONAR
+import Navbar from './components/common/Navbar';
 import Home from './pages/Home';
-import Login from './components/Login';
-import Admin from './pages/Admin';
 import BookDetail from './pages/BookDetail';
+import Login from './components/admin/Login';
+import Admin from './pages/Admin';
 import './App.css';
 
 const ProtectedRoute = ({ children, isAuthenticated }) => {

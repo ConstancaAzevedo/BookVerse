@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { bookApi, commentApi } from '../services/api';
-import RatingStars from '../components/RatingStars';
-import CommentSection from '../components/CommentSection';
-import SimilarBooks from '../components/SimilarBooks';
+import RatingStars from '../components/common/RatingStars';
+import CommentSection from '../components/frontoffice/CommentSection';
+import SimilarBooks from '../components/frontoffice/SimilarBooks';
 import './BookDetail.css';
 
 function BookDetail() {

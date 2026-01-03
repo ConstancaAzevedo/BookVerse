@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import './BookCard.css'; // Criaremos este CSS depois
+import './BookCard.css'; 
 
 /*Card Individual de Cada Livro*/
 

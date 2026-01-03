@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { commentApi } from '../services/api';
-import RatingStars from './RatingStars';
+import { commentApi } from '../../services/api';
+import RatingStars from '../common/RatingStars';
 import './CommentSection.css';
 
 /*Secção de Comentários*/

@@ -1,5 +1,5 @@
-import BookList from '../components/BookList';
-// Remove o header que estava aqui, pois agora temos Navbar
+import BookList from '../components/frontoffice/BookList';
+
 
 function Home() {
   return (

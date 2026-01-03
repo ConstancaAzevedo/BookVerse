@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bookApi } from '../services/api';
-import BookTable from '../components/BookTable';
-import BookFormModal from '../components/BookFormModal';
+import BookTable from '../components/admin/BookTable';
+import BookFormModal from '../components/admin/BookFormModal';
 import './Admin.css';
 
 function Admin({ onLogout }) { // ⭐ REMOVI: isAuthenticated não é usado

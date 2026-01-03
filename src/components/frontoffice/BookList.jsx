@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { bookApi } from '../services/api';
-import BookCard from './BookCard';
-import SearchBar from './SearchBar';
-import Pagination from './Pagination';
+import { bookApi } from '../../services/api';
+import BookCard from '../common/BookCard';
+import SearchBar from '../common/SearchBar';
+import Pagination from '../common/Pagination';
 import './BookList.css';
 
 function BookList() {
@@ -13,7 +13,7 @@ function BookList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalBooks, setTotalBooks] = useState(0);
-  
+
   const booksPerPage = 6;
 
   useEffect(() => {
@@ -22,17 +22,38 @@ function BookList() {
 
   const loadBooks = async () => {
     try {
+      console.log('🔄 [BookList DEBUG] Iniciando loadBooks...');
+      console.log('🔄 [BookList DEBUG] Parâmetros:', {
+        page: searchTerm ? 1 : currentPage,
+        limit: booksPerPage,
+        search: searchTerm
+      });
+
       setLoading(true);
       setError(null);
-      
+
+      console.log('📤 [BookList DEBUG] Chamando bookApi.getBooks()...');
       const result = await bookApi.getBooks(
         searchTerm ? 1 : currentPage,
-        booksPerPage, 
+        booksPerPage,
         searchTerm
       );
-      
+
+      console.log('✅ [BookList DEBUG] Resposta recebida:', result);
+      console.log('📊 [BookList DEBUG] Estrutura da resposta:', {
+        hasData: !!result.data,
+        dataIsArray: Array.isArray(result.data),
+        dataLength: result.data ? result.data.length : 0,
+        total: result.total,
+        totalPages: result.totalPages
+      });
+
+      if (result.data && Array.isArray(result.data)) {
+        console.log('📚 [BookList DEBUG] Primeiro livro:', result.data[0]);
+      }
+
       setBooks(result.data);
-      
+
       if (searchTerm) {
         setTotalPages(1);
         setTotalBooks(result.data.length);
@@ -40,12 +61,25 @@ function BookList() {
         setTotalPages(result.totalPages);
         setTotalBooks(result.total);
       }
-      
+
+      console.log('✅ [BookList DEBUG] State atualizado:', {
+        booksCount: books.length,
+        totalBooks,
+        totalPages
+      });
+
     } catch (err) {
+      console.error('❌ [BookList DEBUG] Erro capturado:', err);
+      console.error('❌ [BookList DEBUG] Error details:', {
+        message: err.message,
+        stack: err.stack
+      });
+
       setError("Erro ao carregar livros. Verifique se a API está em execução.");
       console.error("Erro na API:", err);
     } finally {
       setLoading(false);
+      console.log('🏁 [BookList DEBUG] Loading finalizado');
     }
   };
 
@@ -64,7 +98,7 @@ function BookList() {
       <header className="list-header">
         <h1>📚 Catálogo de Livros</h1>
         <p className="subtitle">
-          {searchTerm 
+          {searchTerm
             ? `Resultados da pesquisa (${books.length} encontrados)`
             : `Descobrir nossa coleção (${totalBooks} livros)`}
         </p>
@@ -89,13 +123,13 @@ function BookList() {
       ) : books.length === 0 ? (
         <div className="empty-state">
           <p className="empty-message">
-            {searchTerm 
+            {searchTerm
               ? `Nenhum livro encontrado para "${searchTerm}"`
               : "Nenhum livro disponível no momento."}
           </p>
           {searchTerm && (
-            <button 
-              onClick={() => handleSearch("")} 
+            <button
+              onClick={() => handleSearch("")}
               className="clear-search-btn"
             >
               Ver todos os livros
@@ -109,7 +143,7 @@ function BookList() {
               <BookCard key={book.id} book={book} />
             ))}
           </div>
-          
+
           {!searchTerm && totalPages > 1 && (
             <Pagination
               currentPage={currentPage}
@@ -119,7 +153,7 @@ function BookList() {
           )}
         </>
       )}
-      
+
       <div className="stats-footer">
         <p>
           Mostrando {books.length} de {totalBooks} livros

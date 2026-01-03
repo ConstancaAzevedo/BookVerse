@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { livrosService } from '../services/api';
+import { livrosService } from '../../services/api';
 
 function FrontOffice() {
   const [livros, setLivros] = useState([]);
