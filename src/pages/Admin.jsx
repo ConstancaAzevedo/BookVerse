@@ -148,9 +148,6 @@ function Admin({ onLogout }) { // ⭐ REMOVI: isAuthenticated não é usado
           <h1>📊 BookVerse Admin Panel</h1>
           <p className="admin-subtitle">Gestão do catálogo de livros</p>
         </div>
-        <button onClick={handleLogout} className="logout-btn">
-          🚪 Sair
-        </button>
       </header>
       
       {/* Main Content */}

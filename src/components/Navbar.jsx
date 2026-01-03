@@ -42,10 +42,10 @@ function Navbar() {
       <div className="navbar-container">
         {/* Logo/Brand */}
         <div className="navbar-brand">
-          <Link to="/" className="navbar-logo">
-            📚 BookVerse
+          <Link to="/" className="navbar-logo"> 
+            <img src="src\imagens\bookverse_logo.png" alt="BookVerse Logo" className="navbar-logo-image" /> 
+            BookVerse 
           </Link>
-          <span className="navbar-subtitle">A tua livraria digital</span>
         </div>
 
         {/* Menu Mobile Toggle */}
@@ -61,16 +61,16 @@ function Navbar() {
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           <div className="navbar-links">
             <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              🏠 Início
+              Início
             </Link>
             <Link to="/#catalogo" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              📖 Catálogo
+              Catálogo
             </Link>
             <a href="#sobre" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              ℹ️ Sobre
+              Sobre
             </a>
             <a href="#contacto" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              📞 Contacto
+              Contacto
             </a>
           </div>
 
@@ -79,10 +79,10 @@ function Navbar() {
             {isLoggedIn ? (
               <div className="user-menu">
                 <button onClick={handleAdmin} className="action-btn admin-btn">
-                  ⚙️ Admin
+                  Admin
                 </button>
                 <button onClick={handleLogout} className="action-btn logout-btn">
-                  🚪 Sair
+                  Sair
                 </button>
               </div>
             ) : (

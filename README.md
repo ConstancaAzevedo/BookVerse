@@ -23,6 +23,7 @@ Catálogo de livros com frontoffice público e backoffice administrativo desenvo
 ```bash
 # Instalar dependências
 npm install
+npm install react-router-dom
 
 # Executar API JSON Server (Terminal 1)
 npm run server
