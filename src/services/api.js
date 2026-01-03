@@ -2,9 +2,9 @@ const API_URL = "http://localhost:3001";
 
 // DADOS MOCK DE LIVROS
 const MOCK_BOOKS = {
-  1: { 
-    id: 1, 
-    title: 'Harry Potter e a Pedra Filosofal', 
+  1: {
+    id: 1,
+    title: 'Harry Potter e a Pedra Filosofal',
     author: 'J.K. Rowling',
     description: 'O primeiro livro da saga Harry Potter. Harry descobre que é um bruxo e inicia sua jornada em Hogwarts.',
     cover: 'https://www.presenca.pt/cdn/shop/products/image-1_f70b8d09-28e7-49d0-9273-a196230a7638_300x.jpg?v=1635288216',
@@ -14,9 +14,9 @@ const MOCK_BOOKS = {
     year: 1997,
     genre: 'Fantasia'
   },
-  2: { 
-    id: 2, 
-    title: '1984', 
+  2: {
+    id: 2,
+    title: '1984',
     author: 'George Orwell',
     description: 'Um clássico da literatura distópica sobre vigilância totalitária e controle mental.',
     cover: 'https://static.fnac-static.com/multimedia/Images/PT/NR/f8/9e/0d/892664/1507-1/tsp20150715100812/1984.jpg',
@@ -108,19 +108,19 @@ export const bookApi = {
   getBooks: async (page = 1, limit = 6, search = "") => {
     try {
       await new Promise(resolve => setTimeout(resolve, 300)); // Simular delay
-      
+
       let filteredBooks = ALL_BOOKS_ARRAY;
-      
+
       // Filtrar se houver pesquisa
       if (search && search.trim() !== "") {
         const term = search.toLowerCase().trim();
-        filteredBooks = filteredBooks.filter(book => 
+        filteredBooks = filteredBooks.filter(book =>
           book.title.toLowerCase().includes(term) ||
           book.author.toLowerCase().includes(term) ||
           (book.genre && book.genre.toLowerCase().includes(term)) ||
           (book.description && book.description.toLowerCase().includes(term))
         );
-        
+
         return {
           data: filteredBooks,
           total: filteredBooks.length,
@@ -129,19 +129,19 @@ export const bookApi = {
           isSearch: true
         };
       }
-      
+
       // Paginação
       const start = (page - 1) * limit;
       const end = start + limit;
       const paginatedBooks = filteredBooks.slice(start, end);
-      
+
       return {
         data: paginatedBooks,
         total: filteredBooks.length,
         page,
         totalPages: Math.ceil(filteredBooks.length / limit)
       };
-      
+
     } catch (error) {
       console.error("Erro na API:", error);
       throw error;
@@ -152,13 +152,13 @@ export const bookApi = {
   getBookById: async (bookId) => {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
-      
+
       const book = MOCK_BOOKS[bookId];
-      
+
       if (!book) {
         throw new Error('Livro não encontrado');
       }
-      
+
       return book;
     } catch (error) {
       console.error('Erro ao buscar livro:', error);
@@ -166,22 +166,103 @@ export const bookApi = {
     }
   },
 
+
+  // Get ALL books (sem paginação, para admin)
+  getAllBooks: async () => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return ALL_BOOKS_ARRAY;
+    } catch (error) {
+      console.error("Erro ao buscar todos os livros:", error);
+      throw error;
+    }
+  },
+
+  // Create book
   createBook: async (bookData) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    console.log('Mock: Criar livro', bookData);
-    return { ...bookData, id: Date.now() };
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Gerar novo ID (simulação)
+      const newId = Math.max(...Object.keys(MOCK_BOOKS).map(Number)) + 1;
+
+      const newBook = {
+        id: newId,
+        ...bookData,
+        cover: bookData.cover || 'https://via.placeholder.com/300x450/cccccc/ffffff?text=Sem+Capa',
+        image: bookData.image || bookData.cover || 'https://via.placeholder.com/300x450/cccccc/ffffff?text=Sem+Capa'
+      };
+
+      // Adicionar ao MOCK_BOOKS
+      MOCK_BOOKS[newId] = newBook;
+      ALL_BOOKS_ARRAY.push(newBook);
+
+      console.log('Livro criado:', newBook);
+      return newBook;
+    } catch (error) {
+      console.error("Erro ao criar livro:", error);
+      throw error;
+    }
   },
 
+  // Update book
   updateBook: async (id, bookData) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    console.log('Mock: Atualizar livro', id, bookData);
-    return { ...bookData, id };
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const bookId = parseInt(id);
+      if (!MOCK_BOOKS[bookId]) {
+        throw new Error('Livro não encontrado');
+      }
+
+      const updatedBook = {
+        ...MOCK_BOOKS[bookId],
+        ...bookData,
+        id: bookId // Garantir que o ID não muda
+      };
+
+      // Atualizar nos mocks
+      MOCK_BOOKS[bookId] = updatedBook;
+
+      // Atualizar no array
+      const index = ALL_BOOKS_ARRAY.findIndex(b => b.id === bookId);
+      if (index !== -1) {
+        ALL_BOOKS_ARRAY[index] = updatedBook;
+      }
+
+      console.log('Livro atualizado:', updatedBook);
+      return updatedBook;
+    } catch (error) {
+      console.error("Erro ao atualizar livro:", error);
+      throw error;
+    }
   },
 
+  // Delete book
   deleteBook: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    console.log('Mock: Eliminar livro', id);
-    return true;
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const bookId = parseInt(id);
+      if (!MOCK_BOOKS[bookId]) {
+        throw new Error('Livro não encontrado');
+      }
+
+      // Remover dos mocks
+      delete MOCK_BOOKS[bookId];
+
+      // Remover do array
+      const index = ALL_BOOKS_ARRAY.findIndex(b => b.id === bookId);
+      if (index !== -1) {
+        ALL_BOOKS_ARRAY.splice(index, 1);
+      }
+
+      console.log('Livro eliminado:', bookId);
+      return { success: true, message: 'Livro eliminado com sucesso' };
+    } catch (error) {
+      console.error("Erro ao eliminar livro:", error);
+      throw error;
+    }
   }
 };
 
@@ -194,16 +275,16 @@ export const getBookById = async (bookId) => {
 export const getSimilarBooks = async (bookId) => {
   try {
     await new Promise(resolve => setTimeout(resolve, 300));
-    
+
     const currentBook = MOCK_BOOKS[bookId];
     if (!currentBook) return [];
-    
+
     // Encontrar livros com o mesmo gênero
-    const similar = ALL_BOOKS_ARRAY.filter(book => 
-      book.id !== bookId && 
+    const similar = ALL_BOOKS_ARRAY.filter(book =>
+      book.id !== bookId &&
       book.genre === currentBook.genre
     ).slice(0, 3); // Limitar a 3 livros
-    
+
     return similar;
   } catch (error) {
     console.error('Erro ao buscar livros similares:', error);
@@ -216,7 +297,7 @@ export const commentApi = {
   getCommentsByBook: async (bookId) => {
     try {
       await new Promise(resolve => setTimeout(resolve, 200));
-      
+
       // Comentários mock
       const mockComments = {
         1: [
@@ -238,7 +319,7 @@ export const commentApi = {
           { id: 8, bookId: 5, user: 'Teresa Lima', text: 'Retrato perfeito de uma época.', date: '2024-01-14', rating: 4 }
         ]
       };
-      
+
       return mockComments[bookId] || [];
     } catch (error) {
       console.error("Erro ao buscar comentários:", error);
@@ -249,14 +330,14 @@ export const commentApi = {
   addComment: async (commentData) => {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
-      
+
       // Simular salvamento
       const newComment = {
         id: Date.now(),
         ...commentData,
         date: new Date().toISOString().split('T')[0]
       };
-      
+
       console.log('Mock: Comentário adicionado', newComment);
       return newComment;
     } catch (error) {
