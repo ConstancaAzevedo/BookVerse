@@ -63,29 +63,36 @@ function BookList() {
       }
 
       console.log('✅ [BookList DEBUG] State atualizado:', {
-        booksCount: books.length,
-        totalBooks,
-        totalPages
+        booksCount: result.data.length,
+        totalBooks: searchTerm ? result.data.length : result.total,
+        totalPages: searchTerm ? 1 : result.totalPages
       });
 
-    } catch (err) {
-      console.error('❌ [BookList DEBUG] Erro capturado:', err);
+    } catch (error) {
+      console.error('❌ [BookList DEBUG] Erro capturado:', error);
       console.error('❌ [BookList DEBUG] Error details:', {
-        message: err.message,
-        stack: err.stack
+        message: error.message,
+        stack: error.stack
       });
 
       setError("Erro ao carregar livros. Verifique se a API está em execução.");
-      console.error("Erro na API:", err);
+      console.error("Erro na API:", error);
     } finally {
       setLoading(false);
       console.log('🏁 [BookList DEBUG] Loading finalizado');
     }
   };
 
-  const handleSearch = (term) => {
+  const handleSearch = async (term) => {
     setSearchTerm(term);
-    setCurrentPage(1);
+    setCurrentPage(1); // ← IMPORTANTE: Resetar para página 1 ao pesquisar
+
+    if (!term.trim()) {
+      // Se busca vazia, carrega todos
+      loadBooks();
+      return;
+    }
+    loadBooks();
   };
 
   const handlePageChange = (page) => {
@@ -126,7 +133,7 @@ function BookList() {
             {searchTerm
               ? `Nenhum livro encontrado para "${searchTerm}"`
               : "Nenhum livro disponível no momento."}
-          </p>
+        </p>
           {searchTerm && (
             <button
               onClick={() => handleSearch("")}
@@ -162,6 +169,6 @@ function BookList() {
       </div>
     </div>
   );
-}
+} 
 
 export default BookList;

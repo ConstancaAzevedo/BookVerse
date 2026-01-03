@@ -1,5 +1,8 @@
 import { SHEETY_CONFIG } from './sheetyConfig';
 
+
+const SHEETY_API_ID = SHEETY_CONFIG.PROJECT_ID; 
+const SHEETY_PROJECT = SHEETY_CONFIG.PROJECT_NAME;
 const BASE_URL = SHEETY_CONFIG.API_BASE;
 const headers = {
   'Content-Type': 'application/json',
@@ -24,7 +27,7 @@ const transformBookFromSheety = (sheetyBook) => {
 };
 
 export const bookApi = {
-  getBooks: async (page = 1, limit = 6, search = "") => {
+  getBooks: async (page = 1, limit = 10, search = "") => {
     try {
       const response = await fetch(`${BASE_URL}/books`, { headers });
       const data = await response.json();

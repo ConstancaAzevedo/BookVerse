@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children, isAuthenticated }) => {
 };
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -23,14 +23,10 @@ function App() {
       }
       setIsLoading(false);
     };
-    
+
     checkAuth();
   }, []);
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('bookverse_admin');
-  };
 
   if (isLoading) {
     return (
@@ -48,25 +44,18 @@ function App() {
   return (
     <Router>
       <div className="App">
-        {/* ⭐ ADICIONAR NAVBAR AQUI - APARECE EM TODAS AS PÁGINAS */}
         <Navbar />
-        
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/book/:id" element={<BookDetail />} />
-          <Route 
-            path="/login" 
-            element={<Login setIsAuthenticated={setIsAuthenticated} />} 
-          />
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <Admin onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

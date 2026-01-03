@@ -1,0 +1,78 @@
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const AuthContext = createContext();
+
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider = ({ children }) => {
+    // Inicializa o estado diretamente do localStorage (sem useEffect)
+    const [user, setUser] = useState(() => {
+        try {
+            const savedUser = localStorage.getItem('bookverse_user');
+            return savedUser ? JSON.parse(savedUser) : null;
+        } catch (error) {
+            console.error('Erro ao ler user do localStorage:', error);
+            return null;
+        }
+    });
+
+    const [loading, setLoading] = useState(false); // false porque já carregamos
+    const navigate = useNavigate();
+
+    const login = async (username, password) => {
+        try {
+            setLoading(true);
+
+            // AQUI: Verificação REAL com a vossa API Sheety
+            // Se tiverem uma sheet "users" no Sheety:
+            // const response = await fetch(`${SHEETY_URL}/users`);
+            // const users = await response.json();
+            // const validUser = users.find(u => u.username === username && u.password === password);
+
+            // Por enquanto, exemplo básico:
+            if (username === 'admin' && password === 'admin123') {
+                const userData = {
+                    username,
+                    role: 'admin',
+                    token: 'fake-jwt-token' // Em produção, viria da API
+                };
+                setUser(userData);
+                localStorage.setItem('bookverse_user', JSON.stringify(userData));
+                return { success: true, user: userData };
+            }
+
+            return {
+                success: false,
+                error: 'Credenciais inválidas. Use admin/admin123'
+            };
+        } catch (error) {
+            console.error('Erro no login:', error);
+            return {
+                success: false,
+                error: `Erro na conexão: ${error.message || 'Servidor não disponível'}`
+            };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem('bookverse_user');
+        navigate('/login');
+    };
+
+    return (
+        <AuthContext.Provider value={{
+            user,
+            login,
+            logout,
+            loading,
+            isAuthenticated: !!user // Adicionei esta propriedade útil
+        }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
