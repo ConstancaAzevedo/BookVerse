@@ -1,7 +1,7 @@
 import { SHEETY_CONFIG } from './sheetyConfig';
 
 
-const SHEETY_API_ID = SHEETY_CONFIG.PROJECT_ID; 
+const SHEETY_API_ID = SHEETY_CONFIG.PROJECT_ID;
 const SHEETY_PROJECT = SHEETY_CONFIG.PROJECT_NAME;
 const BASE_URL = SHEETY_CONFIG.API_BASE;
 const headers = {
@@ -26,6 +26,7 @@ const transformBookFromSheety = (sheetyBook) => {
   };
 };
 
+// API DE LIVROS
 export const bookApi = {
   getBooks: async (page = 1, limit = 10, search = "") => {
     try {
@@ -37,24 +38,49 @@ export const bookApi = {
 
       // Filtrar se houver pesquisa
       if (search && search.trim() !== "") {
-        const term = search.toLowerCase().trim();
-        filteredBooks = filteredBooks.filter(book =>
-          book.title.toLowerCase().includes(term) ||
-          book.author.toLowerCase().includes(term) ||
-          (book.genre && book.genre.toLowerCase().includes(term)) ||
-          (book.description && book.description.toLowerCase().includes(term))
-        );
+        const term = search.trim();
+
+        // Função para remover acentos e converter para minúsculas
+        const normalizarTexto = (texto) => {
+          if (!texto || typeof texto !== 'string') return '';
+          return texto
+            .normalize('NFD') // Separa caracteres base de acentos
+            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+            .toLowerCase();
+        };
+
+        // Normaliza o termo de pesquisa (remove acentos)
+        const termoNormalizado = normalizarTexto(term);
+
+        filteredBooks = filteredBooks.filter(book => {
+          // Valores seguros (strings vazias se não existir)
+          const titulo = book.title || "";
+          const autor = book.author || "";
+          const genero = book.genre || "";
+
+          // Normaliza os campos do livro (remove acentos)
+          const tituloNormalizado = normalizarTexto(titulo);
+          const autorNormalizado = normalizarTexto(autor);
+          const generoNormalizado = normalizarTexto(genero);
+
+          // Pesquisa APENAS em título, autor e género
+          return (
+            tituloNormalizado.includes(termoNormalizado) ||
+            autorNormalizado.includes(termoNormalizado) ||
+            generoNormalizado.includes(termoNormalizado)
+          );
+        });
 
         return {
           data: filteredBooks,
           total: filteredBooks.length,
           page: 1,
-          totalPages: 1,
+          totalPages: Math.max(1, Math.ceil(filteredBooks.length / limit)),
           isSearch: true
         };
       }
 
-      // Paginação
+      // Paginação (sem pesquisa)
       const start = (page - 1) * limit;
       const end = start + limit;
       const paginatedBooks = filteredBooks.slice(start, end);
@@ -68,7 +94,12 @@ export const bookApi = {
 
     } catch (error) {
       console.error("Erro na API:", error);
-      throw error;
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        totalPages: 1
+      };
     }
   },
 
@@ -233,11 +264,12 @@ export const commentApi = {
 
       const numericBookId = parseInt(bookId);
 
-      // Comentários usam IDs do sistema (1, 2, 3...)
+      // Comentários usam IDs do sistema (1, 2, 3...) - subtraindo 1 do ID do Sheety
       const bookComments = allComments
         .filter(comment => parseInt(comment.bookId) === numericBookId)
         .map(comment => ({
-          id: comment.id,
+          id: parseInt(comment.id) - 1, // ⬅️ AQUI: Sistema ID = Sheety ID - 1
+          sheetyId: parseInt(comment.id), // ⬅️ ID original do Sheety
           bookId: parseInt(comment.bookId),
           user: comment.user,
           text: comment.text,
@@ -256,31 +288,72 @@ export const commentApi = {
 
   addComment: async (commentData) => {
     try {
-      const sheetyComment = {
-        bookId: commentData.bookId.toString(),
-        user: commentData.user,
-        text: commentData.text,
-        date: commentData.date || new Date().toISOString().split('T')[0],
-        rating: commentData.rating?.toString() || '0'
+      console.log("🔍 DEBUG: Iniciando addComment");
+      console.log("🔍 DEBUG: Dados recebidos:", commentData);
+
+      // 1. Buscar TODOS os comentários para calcular próximo ID
+      const getAllResponse = await fetch(`${BASE_URL}/comments`, { headers });
+      const allData = await getAllResponse.json();
+      const allComments = allData.comments || [];
+
+      // Calcular próximo ID do Sheety (não do sistema)
+      let nextSheetyId = 1;
+      if (allComments.length > 0) {
+        const sheetyIds = allComments.map(c => parseInt(c.id || c.Id || c.ID || 0));
+        const maxSheetyId = Math.max(...sheetyIds.filter(id => !isNaN(id)));
+        nextSheetyId = maxSheetyId + 1;
+      }
+
+      // ID do sistema será nextSheetyId - 1
+      const systemId = nextSheetyId - 1;
+
+      console.log(`🔢 Próximo ID Sheety: ${nextSheetyId}, ID Sistema: ${systemId}`);
+
+      // 2. Garantir data atual
+      const today = new Date().toISOString().split('T')[0];
+
+      // 3. Estrutura para o Sheety
+      const payload = {
+        comment: {
+          id: nextSheetyId.toString(), // ID do Sheety
+          bookId: commentData.bookId.toString(),
+          user: commentData.user || commentData.userName || "Anónimo",
+          text: commentData.text || "",
+          date: today,
+          rating: (commentData.rating || 0).toString()
+        }
       };
+
+      console.log("📤 Enviando dados:", payload);
 
       const response = await fetch(`${BASE_URL}/comments`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ comment: sheetyComment })
+        body: JSON.stringify(payload)
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro ${response.status}: ${errorText}`);
+      }
+
       const data = await response.json();
+      console.log("✅ Comentário adicionado:", data);
+
+      // Retornar com ID do sistema
+      const returnedComment = data.comment || data;
       return {
-        id: data.comment.id,
-        bookId: parseInt(data.comment.bookId),
-        user: data.comment.user,
-        text: data.comment.text,
-        date: data.comment.date,
-        rating: parseInt(data.comment.rating) || 0
+        id: systemId, // ⬅️ ID do sistema
+        sheetyId: nextSheetyId, // ⬅️ ID do Sheety
+        bookId: parseInt(returnedComment.bookId || commentData.bookId),
+        user: returnedComment.user || commentData.user,
+        text: returnedComment.text || commentData.text,
+        date: returnedComment.date || today,
+        rating: parseInt(returnedComment.rating || commentData.rating) || 0
       };
+
     } catch (error) {
-      console.error("Erro ao adicionar comentário:", error);
+      console.error("❌ ERRO CRÍTICO em addComment:", error);
       throw error;
     }
   }
@@ -291,6 +364,7 @@ export const getBookById = async (bookId) => {
   return await bookApi.getBookById(bookId);
 };
 
+//API DE LIVROS SIMILARES
 export const getSimilarBooks = async (bookId) => {
   try {
     console.log(`🔍 Buscando livros similares para ID ${bookId}...`);
@@ -312,3 +386,214 @@ export const getSimilarBooks = async (bookId) => {
     return [];
   }
 };
+
+
+// API DE LIKES EM COMENTÁRIOS
+export const likesApi = {
+  // Dar like a um comentário
+  likeComment: async (commentId, userId) => {
+    try {
+      console.log("❤️ Tentando dar like ao comentário:", commentId, "userId:", userId);
+
+      // 1. PRIMEIRO: Buscar o próximo ID disponível
+      let nextId = 1;
+      try {
+        const response = await fetch(`${BASE_URL}/commentLikes`, { headers });
+        if (response.ok) {
+          const data = await response.json();
+          const allLikes = data.commentLikes || [];
+
+          if (allLikes.length > 0) {
+            // Encontrar o maior ID existente
+            const ids = allLikes
+              .map(like => parseInt(like.id || 0))
+              .filter(id => !isNaN(id) && id > 0);
+
+            if (ids.length > 0) {
+              nextId = Math.max(...ids) + 1;
+            }
+          }
+        }
+      } catch (error) {
+        console.warn("⚠️ Não foi possível buscar IDs existentes, usando ID 1", error);
+      }
+
+      console.log(`🔢 Próximo ID para like: ${nextId}`);
+
+      const dataValue = new Date().toISOString();
+
+      // ⭐⭐ ENVIAR O ID EXPLICITAMENTE ⭐⭐
+      const payload = {
+        commentLike: {
+          id: nextId.toString(),      // ⬅️ ADICIONAR ID AQUI!
+          commentId: commentId.toString(),
+          userId: userId.toString(),
+          data: dataValue
+        }
+      };
+
+      console.log("📤 Enviando dados:", payload);
+
+      const response = await fetch(`${BASE_URL}/commentLikes`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+
+      console.log("📡 Status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log("✅ Like adicionado:", data);
+      return data;
+
+    } catch (error) {
+      console.error("❌ Erro ao dar like:", error);
+      throw error;
+    }
+  },
+
+
+  // Remover like de um comentário
+  unlikeComment: async (commentId, userId) => {
+    try {
+      console.log("🚫 Tentando remover like do comentário:", commentId);
+
+      const response = await fetch(`${BASE_URL}/commentLikes`, { headers });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar likes: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("📊 Likes existentes:", data);
+
+      const allLikes = data.commentLikes || [];
+
+      // Converter commentId do sistema para Sheety se necessário
+      const sheetyCommentId = parseInt(commentId) + 1; // Se usar sistema de IDs
+
+      // Encontrar like deste user para este comentário
+      const userLike = allLikes.find(like =>
+        like &&
+        (parseInt(like.commentId) === parseInt(commentId) || // ID sistema
+          parseInt(like.commentId) === sheetyCommentId) && // OU ID Sheety
+        like.userId === userId.toString()
+      );
+
+      console.log("🔍 Like encontrado para eliminar:", userLike);
+
+      if (userLike && userLike.id) {
+        // Eliminar o like encontrado
+        const deleteResponse = await fetch(`${BASE_URL}/commentLikes/${userLike.id}`, {
+          method: 'DELETE',
+          headers
+        });
+
+        console.log("✅ Like removido, status:", deleteResponse.status);
+        return await deleteResponse.json();
+      }
+
+      return { success: false, message: 'Like não encontrado' };
+
+    } catch (error) {
+      console.error("❌ Erro ao remover like do comentário:", error);
+      throw error;
+    }
+  },
+
+  // Contar likes de um comentário
+  getCommentLikes: async (commentId) => {
+    try {
+      console.log("🔢 Contando likes do comentário:", commentId);
+
+      const response = await fetch(`${BASE_URL}/commentLikes`, { headers });
+
+      if (!response.ok) {
+        console.log("⚠️ Não foi possível buscar likes, assumindo 0");
+        return { count: 0, likes: [] };
+      }
+
+      const data = await response.json();
+      console.log("📊 Resposta completa:", data);
+
+      // Estrutura correta: { commentLikes: [...] }
+      const allLikes = data.commentLikes || [];
+
+      // Filtrar likes deste comentário
+      const commentLikes = allLikes.filter(like =>
+        like && parseInt(like.commentId) === parseInt(commentId)
+      );
+
+      console.log(`✅ ${commentLikes.length} likes para comentário ${commentId}`);
+
+      return {
+        count: commentLikes.length,
+        likes: commentLikes
+      };
+
+    } catch (error) {
+      console.error("❌ Erro ao contar likes do comentário:", error);
+      return { count: 0, likes: [] };
+    }
+  },
+
+  // Verificar se user já deu like ao comentário
+  hasUserLikedComment: async (commentId, userId) => {
+    try {
+      console.log("🔍 Verificando se user", userId, "deu like ao comentário", commentId);
+
+      const response = await fetch(`${BASE_URL}/commentLikes`, { headers });
+
+      if (!response.ok) {
+        console.log("⚠️ Não foi possível verificar likes");
+        return false;
+      }
+
+      const data = await response.json();
+
+      // Estrutura correta
+      const allLikes = data.commentLikes || [];
+
+      const userLike = allLikes.find(like =>
+        like &&
+        parseInt(like.commentId) === parseInt(commentId) &&
+        like.userId === userId.toString()
+      );
+
+      const hasLiked = !!userLike;
+      console.log("✅ User já deu like?", hasLiked);
+
+      return hasLiked;
+
+    } catch (error) {
+      console.error("❌ Erro ao verificar like do comentário:", error);
+      return false;
+    }
+  },
+
+  // Toggle like em comentário
+  toggleCommentLike: async (commentId, userId) => {
+    try {
+      console.log("🔄 Alternando like para comentário:", commentId);
+
+      const hasLiked = await likesApi.hasUserLikedComment(commentId, userId);
+
+      if (hasLiked) {
+        console.log("🔄 Removendo like existente...");
+        return await likesApi.unlikeComment(commentId, userId);
+      } else {
+        console.log("🔄 Adicionando novo like...");
+        return await likesApi.likeComment(commentId, userId);
+      }
+    } catch (error) {
+      console.error("❌ Erro no toggle:", error);
+      throw error;
+    }
+  }
+};
+

@@ -24,7 +24,7 @@ function Navbar() {
         <div className="navbar-brand">
           <Link to="/" className="navbar-logo">
             <img
-              src="src/imagens/bookverse_logo.png"
+              src="src\imagens\bookverse_logo.png"
               alt="BookVerse Logo"
               className="navbar-logo-image"
               style={{ width: '40px', height: '40px' }}

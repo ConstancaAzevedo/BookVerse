@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { commentApi } from '../../services/api';
 import RatingStars from '../common/RatingStars';
 import './CommentSection.css';
+import LikeButton from '../common/LikeButton';
 
 /*Secção de Comentários*/
 
@@ -9,7 +10,26 @@ function CommentSection({ bookId }) {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userId, setUserId] = useState('');
+
+  useEffect(() => {
+  // Gerar ou recuperar userId
+  const generateUserId = () => {
+    let storedId = localStorage.getItem('commentUserId');
+    
+    if (!storedId) {
+      // Criar ID único
+      storedId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('commentUserId', storedId);
+    }
+    
+    setUserId(storedId);
+  };
   
+  generateUserId();
+}, []);
+
+
   // Form state
   const [newComment, setNewComment] = useState({
     name: '',
@@ -39,7 +59,7 @@ function CommentSection({ bookId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!newComment.text.trim()) {
       setError('Por favor, escreva um comentário');
       return;
@@ -56,15 +76,14 @@ function CommentSection({ bookId }) {
     try {
       const commentToSubmit = {
         bookId: parseInt(bookId),
-        userName: newComment.name,
-        userEmail: newComment.email || 'anonimo@exemplo.com',
+        user: newComment.name,
         text: newComment.text,
         rating: newComment.rating,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0] // data atual
       };
 
       await commentApi.addComment(commentToSubmit);
-      
+
       // Reset form
       setNewComment({
         name: '',
@@ -72,14 +91,14 @@ function CommentSection({ bookId }) {
         text: '',
         rating: 0
       });
-      
+
       setSubmitSuccess(true);
       loadComments(); // Recarregar comentários
-      
-      // Esconder mensagem de sucesso após 3 segundos
+
+      // esconder mensagem de sucesso após 3 segundos
       setTimeout(() => setSubmitSuccess(false), 3000);
     } catch (error) {
-      setError('Erro ao enviar comentário. Tente novamente.');
+      console.error("Erro ao enviar comentário", error);
     } finally {
       setSubmitting(false);
     }
@@ -144,8 +163,8 @@ function CommentSection({ bookId }) {
 
           <div className="form-group">
             <label>Avaliação</label>
-            <RatingStars 
-              onRate={handleRate} 
+            <RatingStars
+              onRate={handleRate}
               initialRating={newComment.rating}
             />
           </div>
@@ -169,8 +188,8 @@ function CommentSection({ bookId }) {
             </div>
           )}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="submit-comment-btn"
             disabled={submitting}
           >
@@ -194,16 +213,18 @@ function CommentSection({ bookId }) {
             <div key={comment.id} className="comment-card">
               <div className="comment-header">
                 <div className="comment-author">
-                  <strong>{comment.userName}</strong>
-                  {comment.userEmail && (
-                    <span className="comment-email"> ({comment.userEmail})</span>
-                  )}
+                  <strong>{comment.user}</strong>
                 </div>
                 <div className="comment-meta">
                   {comment.rating > 0 && (
                     <RatingStars initialRating={comment.rating} readOnly size="small" />
                   )}
                   <span className="comment-date">{formatDate(comment.date)}</span>
+
+                  {/* Botão de Like para o comentário */}
+                  <LikeButton 
+                    commentId={comment.id} 
+                    userId={userId} />
                 </div>
               </div>
               <div className="comment-text">

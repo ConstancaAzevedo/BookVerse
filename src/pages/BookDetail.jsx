@@ -4,12 +4,14 @@ import { bookApi, commentApi } from '../services/api';
 import RatingStars from '../components/common/RatingStars';
 import CommentSection from '../components/frontoffice/CommentSection';
 import SimilarBooks from '../components/frontoffice/SimilarBooks';
+import LikeButton from '../components/common/LikeButton';
 import './BookDetail.css';
+
 
 function BookDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -20,11 +22,11 @@ function BookDetail() {
       try {
         setLoading(true);
         setError('');
-        
+
         // Carregar livro - CORREÇÃO: usar bookApi.getBookById()
         const bookData = await bookApi.getBookById(id);
         setBook(bookData);
-        
+
         // Carregar contagem de comentários
         try {
           const comments = await commentApi.getCommentsByBook(id);
@@ -33,7 +35,7 @@ function BookDetail() {
           console.warn('Não foi possível carregar comentários:', commentError);
           setCommentsCount(0);
         }
-        
+
       } catch (err) {
         setError('Livro não encontrado ou erro ao carregar.');
         console.error('Erro:', err);
@@ -94,15 +96,15 @@ function BookDetail() {
         {/* Informações do livro */}
         <div className="book-main-info">
           <div className="book-cover-large">
-            <img 
-              src={book.image || book.cover || 'https://via.placeholder.com/300x450/cccccc/ffffff?text=Sem+Capa'} 
+            <img
+              src={book.image || book.cover || 'https://via.placeholder.com/300x450/cccccc/ffffff?text=Sem+Capa'}
               alt={`Capa de ${book.title}`}
               onError={(e) => {
                 e.target.src = 'https://via.placeholder.com/300x450/cccccc/ffffff?text=Sem+Capa';
               }}
             />
           </div>
-          
+
           <div className="book-details">
             <div className="book-header">
               <h1 className="book-title">{book.title}</h1>
@@ -111,7 +113,7 @@ function BookDetail() {
                 <h2 className="book-author">{book.author}</h2>
               </div>
             </div>
-            
+
             <div className="book-meta-info">
               <div className="meta-item">
                 <span className="meta-label">Publicado em</span>
@@ -120,17 +122,17 @@ function BookDetail() {
                   <span className="meta-subtext">({bookAge} {bookAge === 1 ? 'ano' : 'anos'})</span>
                 )}
               </div>
-              
+
               <div className="meta-item">
                 <span className="meta-label">Género</span>
                 <span className="meta-badge">{book.genre}</span>
               </div>
-              
+
               <div className="meta-item">
                 <span className="meta-label">Comentários</span>
                 <span className="meta-value">{commentsCount}</span>
               </div>
-              
+
               {book.pages && (
                 <div className="meta-item">
                   <span className="meta-label">Páginas</span>
@@ -138,7 +140,7 @@ function BookDetail() {
                 </div>
               )}
             </div>
-            
+
             {/* Rating */}
             <div className="book-rating">
               <h3>Avaliação dos Leitores</h3>
@@ -150,22 +152,24 @@ function BookDetail() {
                 </div>
               </div>
             </div>
-            
+
             {/* Ações */}
             <div className="book-actions">
               <button className="action-btn favorite-btn">
-                ❤️ Adicionar aos Favoritos
+                ⭐ Adicionar aos Favoritos
               </button>
+
               <button className="action-btn share-btn">
                 📤 Partilhar
               </button>
+
               <Link to={`/admin`} className="action-btn edit-btn">
                 ✏️ Editar (Admin)
               </Link>
             </div>
           </div>
         </div>
-        
+
         {/* Descrição completa */}
         <div className="book-description-section">
           <h3>📖 Sinopse</h3>
@@ -179,7 +183,7 @@ function BookDetail() {
             )}
           </div>
         </div>
-        
+
         {/* Informações adicionais */}
         <div className="book-additional-info">
           <div className="info-card">
@@ -193,7 +197,7 @@ function BookDetail() {
               <li><strong>Adicionado ao catálogo:</strong> Janeiro 2025</li>
             </ul>
           </div>
-          
+
           <div className="info-card">
             <h4>🏷️ Palavras-chave</h4>
             <div className="tags">
@@ -206,13 +210,13 @@ function BookDetail() {
             </div>
           </div>
         </div>
-        
+
         {/* Comentários */}
         <CommentSection bookId={id} />
-        
+
         {/* Livros similares */}
         {book && <SimilarBooks currentBook={book} />}
-        
+
         {/* Footer da página */}
         <div className="book-detail-footer">
           <p className="last-updated">
