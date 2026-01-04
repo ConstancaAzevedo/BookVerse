@@ -4,9 +4,7 @@ import { bookApi, commentApi } from '../services/api';
 import RatingStars from '../components/common/RatingStars';
 import CommentSection from '../components/frontoffice/CommentSection';
 import SimilarBooks from '../components/frontoffice/SimilarBooks';
-import LikeButton from '../components/common/LikeButton';
 import './BookDetail.css';
-
 
 function BookDetail() {
   const { id } = useParams();

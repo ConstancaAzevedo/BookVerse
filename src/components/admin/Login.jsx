@@ -1,13 +1,18 @@
+// Login.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // ⬅️ Importe useAuth
 import './Login.css';
 
-function Login({ setIsAuthenticated }) {
+function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // ⭐⭐ USE O HOOK useAuth ⭐⭐
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,14 +20,14 @@ function Login({ setIsAuthenticated }) {
     setIsLoading(true);
 
     try {
-      if (username === 'admin' && password === 'admin123') {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setIsAuthenticated(true);
-        localStorage.setItem('bookverse_admin', 'true');
-        navigate('/admin'); // ⭐ AGORA ESTÁ A SER USADO
+      // ⭐⭐ USE A FUNÇÃO login DO CONTEXT ⭐⭐
+      const result = await login(username, password);
+
+      if (result.success) {
+        // Login bem-sucedido - redireciona para /admin
+        navigate('/admin');
       } else {
-        setError('Credenciais inválidas. Tente: admin / admin123');
+        setError(result.error || 'Credenciais inválidas');
       }
     } catch (error) {
       setError('Erro no login. Tente novamente.');
@@ -69,8 +74,8 @@ function Login({ setIsAuthenticated }) {
 
           {error && <div className="error-message">{error}</div>}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="login-btn"
             disabled={isLoading}
           >

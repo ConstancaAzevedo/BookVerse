@@ -5,7 +5,7 @@ import BookTable from '../components/admin/BookTable';
 import BookFormModal from '../components/admin/BookFormModal';
 import './Admin.css';
 
-function Admin({ onLogout }) { // ⭐ REMOVI: isAuthenticated não é usado
+function Admin({ onLogout }) { 
   const navigate = useNavigate();
   
   // States para livros
@@ -148,6 +148,9 @@ function Admin({ onLogout }) { // ⭐ REMOVI: isAuthenticated não é usado
           <h1>📊 BookVerse Admin Panel</h1>
           <p className="admin-subtitle">Gestão do catálogo de livros</p>
         </div>
+        <button onClick={handleLogout} className="logout-btn">
+          🚪 Sair
+        </button>
       </header>
       
       {/* Main Content */}

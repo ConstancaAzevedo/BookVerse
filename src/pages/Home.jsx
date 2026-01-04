@@ -1,6 +1,5 @@
 import BookList from '../components/frontoffice/BookList';
 
-
 function Home() {
   return (
     <div className="home-page">
@@ -11,7 +10,7 @@ function Home() {
           <p>Descobre milhares de livros e partilha as tuas opiniões</p>
         </div>
       </div>
-      
+
       {/* Conteúdo principal */}
       <main>
         <BookList />

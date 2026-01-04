@@ -1,13 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext'; // ← ADICIONA
+import { useAuth } from '../../context/AuthContext'; 
 import './Navbar.css';
 
 function Navbar() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout } = useAuth(); // ← USA O CONTEXTO
-  const isLoggedIn = !!user; // ← SIMPLES!
+  const { user, logout } = useAuth(); 
+  const isLoggedIn = !!user;
 
   const handleLogin = () => {
     navigate('/login');
