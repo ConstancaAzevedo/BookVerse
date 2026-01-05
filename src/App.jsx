@@ -8,6 +8,7 @@ import BookDetail from './pages/BookDetail';
 import Login from './components/admin/Login';
 import Admin from './pages/Admin';
 import ScrollToTop from './components/common/ScrollToTop';
+import Footer from './components/common/Footer';
 import './App.css';
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
           <ScrollToTop />
+          <Footer />
         </div>
       </AuthProvider>
     </Router>

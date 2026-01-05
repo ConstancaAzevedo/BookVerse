@@ -94,7 +94,7 @@ function BookList() {
   };
 
   return (
-    <div className="book-list-container">
+    <div className="book-list-container" id="catalogo">
       <header className="list-header">
         <h1>📚 Catálogo de Livros</h1>
         <p className="subtitle">
