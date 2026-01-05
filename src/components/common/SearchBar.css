@@ -62,7 +62,6 @@
   margin: 5px 0 0 0;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .search-input-group {
     flex-direction: column;

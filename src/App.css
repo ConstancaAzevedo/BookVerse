@@ -1,4 +1,4 @@
-/* Estilos globais atualizados */
+
 * {
   margin: 0;
   padding: 0;
@@ -17,16 +17,16 @@ body {
   overflow-x: hidden;
 }
 
-/* Ajustar conteúdo para não ficar por baixo da navbar */
+
 .App {
-  padding-top: 0; /* A navbar é sticky, não precisa de padding */
+  padding-top: 0; 
 }
 
 .home-page {
-  min-height: calc(100vh - 70px); /* Altura total menos navbar */
+  min-height: calc(100vh - 70px);
 }
 
-/* Hero Section */
+
 .hero-section {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -47,7 +47,7 @@ body {
   margin: 0 auto;
 }
 
-/* Loading spinner */
+
 .loading-spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
@@ -62,7 +62,7 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-/* Links globais */
+
 a {
   color: inherit;
   text-decoration: none;

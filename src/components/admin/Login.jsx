@@ -1,7 +1,6 @@
-// Login.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // ⬅️ Importe useAuth
+import { useAuth } from '../../context/AuthContext'; 
 import './Login.css';
 
 function Login() {
@@ -11,7 +10,6 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ⭐⭐ USE O HOOK useAuth ⭐⭐
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -20,11 +18,9 @@ function Login() {
     setIsLoading(true);
 
     try {
-      // ⭐⭐ USE A FUNÇÃO login DO CONTEXT ⭐⭐
       const result = await login(username, password);
 
       if (result.success) {
-        // Login bem-sucedido - redireciona para /admin
         navigate('/admin');
       } else {
         setError(result.error || 'Credenciais inválidas');
@@ -41,7 +37,7 @@ function Login() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1>🔐 BookVerse Admin</h1>
+          <h1>BookVerse Admin</h1>
           <p>Acesso à gestão do catálogo</p>
         </div>
 

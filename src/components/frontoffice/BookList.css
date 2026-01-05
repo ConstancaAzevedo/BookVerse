@@ -31,7 +31,6 @@
   margin-bottom: 40px;
 }
 
-/* Estados de carregamento e erro */
 .loading-container,
 .error-container,
 .empty-state {
@@ -107,7 +106,6 @@
   font-size: 0.9rem;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .list-header h1 {
     font-size: 2rem;
@@ -129,8 +127,6 @@
   }
 }
 
-
-/* Estilos para ordenação */
 .sort-container {
   display: flex;
   align-items: center;

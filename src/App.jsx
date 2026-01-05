@@ -1,4 +1,3 @@
-// App.jsx - VERSÃO CORRIGIDA
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -28,7 +27,6 @@ function App() {
             {/* Rota protegida - Admin */}
             <Route path="/admin" element={
               <ProtectedRoute>
-                {/* ⭐ PASSE A PROP onLogout AQUI */}
                 <Admin onLogout={() => {
                   console.log('Logout from App');
                 }} />

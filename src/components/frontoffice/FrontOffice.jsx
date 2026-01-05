@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { livrosService } from '../../services/api';
+import { bookApi } from '../../services/api';
 
 function FrontOffice() {
   const [livros, setLivros] = useState([]);
@@ -10,8 +10,9 @@ function FrontOffice() {
   useEffect(() => {
     const fetchLivros = async () => {
       try {
-        const response = await livrosService.getAll();
-        setLivros(response.data);
+        const response = await bookApi.getAllBooks();
+
+        setLivros(response);
         setLoading(false);
       } catch (error) {
         console.error('Erro ao buscar livros:', error);
@@ -22,18 +23,18 @@ function FrontOffice() {
     fetchLivros();
   }, []);
 
-  // Cálculos para paginação
+
   const indexUltimoLivro = paginaAtual * livrosPorPagina;
   const indexPrimeiroLivro = indexUltimoLivro - livrosPorPagina;
   const livrosAtuais = livros.slice(indexPrimeiroLivro, indexUltimoLivro);
   const totalPaginas = Math.ceil(livros.length / livrosPorPagina);
 
-  // Mudar página
+
   const mudarPagina = (numeroPagina) => setPaginaAtual(numeroPagina);
 
   if (loading) return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h2>📚 A carregar livros...</h2>
+      <h2>A carregar livros...</h2>
     </div>
   );
 
@@ -52,7 +53,6 @@ function FrontOffice() {
         📚 BookVerse - Catálogo de Livros
       </h1>
 
-      {/* Informação da paginação */}
       <div style={{
         textAlign: 'center',
         marginBottom: '20px',
@@ -83,8 +83,8 @@ function FrontOffice() {
           >
             <div style={{ textAlign: 'center', marginBottom: '15px' }}>
               <img 
-                src={livro.imagem} 
-                alt={livro.titulo}
+                src={livro.image || livro.cover || 'https://via.placeholder.com/120x160?text=No+Img'} 
+                alt={livro.title}
                 style={{ 
                   width: '120px', 
                   height: '160px',
@@ -100,7 +100,7 @@ function FrontOffice() {
               color: '#2c3e50',
               fontSize: '1.2em'
             }}>
-              {livro.titulo}
+              {livro.title}
             </h3>
             
             <p style={{ 
@@ -108,7 +108,7 @@ function FrontOffice() {
               color: '#7f8c8d',
               fontSize: '0.9em'
             }}>
-              <strong>Autor:</strong> {livro.autor}
+              <strong>Autor:</strong> {livro.author}
             </p>
             
             <p style={{ 
@@ -117,13 +117,13 @@ function FrontOffice() {
               fontSize: '0.9em',
               lineHeight: '1.4'
             }}>
-              {livro.descricao}
+              {livro.description}
             </p>
           </div>
         ))}
       </div>
 
-      {/* Navegação de páginas */}
+
       <div style={{
         display: 'flex',
         justifyContent: 'center',
@@ -132,7 +132,7 @@ function FrontOffice() {
         marginTop: '30px',
         flexWrap: 'wrap'
       }}>
-        {/* Botão Anterior */}
+
         <button
           onClick={() => mudarPagina(paginaAtual - 1)}
           disabled={paginaAtual === 1}
@@ -148,7 +148,7 @@ function FrontOffice() {
           ← Anterior
         </button>
 
-        {/* Números das páginas */}
+
         {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(numero => (
           <button
             key={numero}
@@ -167,7 +167,7 @@ function FrontOffice() {
           </button>
         ))}
 
-        {/* Botão Próximo */}
+
         <button
           onClick={() => mudarPagina(paginaAtual + 1)}
           disabled={paginaAtual === totalPaginas}

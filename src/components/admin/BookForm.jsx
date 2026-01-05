@@ -2,7 +2,6 @@ import { useState } from 'react';
 import './BookForm.css';
 
 function BookForm({ onSubmit, initialData, onCancel }) {
-  // Inicializa com initialData OU valores padrão
   const [formData, setFormData] = useState(() => {
     if (initialData) {
       return {
@@ -42,8 +41,7 @@ function BookForm({ onSubmit, initialData, onCancel }) {
     
     if (result.success) {
       setMessage({ type: 'success', text: result.message });
-      
-      // Se não estiver editando, limpa o formulário
+
       if (!initialData) {
         setFormData({
           title: '',

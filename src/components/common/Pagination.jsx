@@ -1,16 +1,13 @@
 import './Pagination.css';
 
-/*Componente de Paginação*/
-
 function Pagination({ currentPage, totalPages, onPageChange }) {
-  const maxVisible = 5; // Máximo de números de página visíveis
+  const maxVisible = 5; 
   
   const getPageNumbers = () => {
     const pages = [];
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     let end = Math.min(totalPages, start + maxVisible - 1);
     
-    // Ajustar start se end estiver no limite
     start = Math.max(1, end - maxVisible + 1);
     
     for (let i = start; i <= end; i++) {

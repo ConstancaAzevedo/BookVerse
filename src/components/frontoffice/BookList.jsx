@@ -13,7 +13,7 @@ function BookList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalBooks, setTotalBooks] = useState(0);
-  const [sortBy, setSortBy] = useState('title-asc'); // NOVO: state para ordenação
+  const [sortBy, setSortBy] = useState('title-asc');
 
   const booksPerPage = 6;
 
@@ -21,9 +21,8 @@ function BookList() {
     loadBooks();
   }, [currentPage, searchTerm]);
 
-  // função para ordenar os livros
+
   const sortedBooks = [...books].sort((a, b) => {
-    // Garantir que temos strings válidas
     const titleA = String(a?.title || '').toLowerCase();
     const titleB = String(b?.title || '').toLowerCase();
     const yearA = Number(a?.year) || 0;
@@ -41,10 +40,8 @@ function BookList() {
     }
   });
 
-  // calcular livros para a página atual (dos ordenados)
-  const startIndex = (currentPage - 1) * booksPerPage;
-  const endIndex = startIndex + booksPerPage;
-  const paginatedBooks = sortedBooks.slice(startIndex, endIndex);
+
+  const paginatedBooks = sortedBooks; 
 
   const loadBooks = async () => {
     try {
@@ -54,12 +51,14 @@ function BookList() {
       setError(null);
 
       const result = await bookApi.getBooks(
-        searchTerm ? 1 : currentPage,
+        currentPage,
         booksPerPage,
         searchTerm
       );
 
+      console.log('✅ BookList: Livros recebidos:', result.data.length);
       setBooks(result.data);
+
 
       if (searchTerm) {
         setTotalPages(1);
@@ -70,7 +69,7 @@ function BookList() {
       }
 
     } catch (error) {
-      console.error('❌ [BookList DEBUG] Erro capturado:', error);
+      console.error('Erro capturado:', error);
       setError("Erro ao carregar livros. Verifique se a API está em execução.");
     } finally {
       setLoading(false);
@@ -107,7 +106,6 @@ function BookList() {
       <div className="search-section">
         <SearchBar onSearch={handleSearch} initialValue={searchTerm} />
 
-        {/* NOVO: Dropdown de ordenação */}
         <div className="sort-container">
           <label htmlFor="sort-select" className="sort-label">
             Ordenar por:
@@ -157,7 +155,6 @@ function BookList() {
         </div>
       ) : (
         <>
-          {/* ALTERADO: Usar paginatedBooks em vez de books */}
           <div className="books-grid">
             {paginatedBooks.map((book) => (
               <BookCard key={book.id} book={book} />

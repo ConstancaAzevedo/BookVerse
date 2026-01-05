@@ -164,7 +164,7 @@
   cursor: not-allowed;
 }
 
-/* Responsividade */
+
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;

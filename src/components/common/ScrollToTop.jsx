@@ -4,7 +4,6 @@ import './ScrollToTop.css';
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
 
-  // Mostrar botão quando descemos 300px
   useEffect(() => {
     const toggleVisibility = () => {
       if (window.pageYOffset > 300) {
@@ -18,7 +17,6 @@ const ScrollToTop = () => {
     return () => window.removeEventListener('scroll', toggleVisibility);
   }, []);
 
-  // Scroll suave para o topo
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,

@@ -71,7 +71,7 @@
   margin-top: 10px !important;
 }
 
-/* Responsividade */
+
 @media (max-width: 768px) {
   .footer-content {
     flex-direction: column;

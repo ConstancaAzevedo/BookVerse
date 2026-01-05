@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import './SearchBar.css';
 
-/*Barra de Pesquisa*/
-
 function SearchBar({ onSearch, initialValue = "" }) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
 
@@ -29,7 +27,7 @@ function SearchBar({ onSearch, initialValue = "" }) {
         
         <div className="search-buttons">
           <button type="submit" className="search-btn">
-            🔍 Buscar
+            Buscar
           </button>
           
           {searchTerm && (
@@ -38,7 +36,7 @@ function SearchBar({ onSearch, initialValue = "" }) {
               onClick={handleClear}
               className="clear-btn"
             >
-              ✕ Limpar
+              Limpar
             </button>
           )}
         </div>

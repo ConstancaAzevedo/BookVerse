@@ -7,7 +7,6 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    // Inicializa o estado diretamente do localStorage (sem useEffect)
     const [user, setUser] = useState(() => {
         try {
             const savedUser = localStorage.getItem('bookverse_user');
@@ -18,25 +17,18 @@ export const AuthProvider = ({ children }) => {
         }
     });
 
-    const [loading, setLoading] = useState(false); // false porque já carregamos
+    const [loading, setLoading] = useState(false); 
     const navigate = useNavigate();
 
     const login = async (username, password) => {
         try {
             setLoading(true);
 
-            // AQUI: Verificação REAL com a vossa API Sheety
-            // Se tiverem uma sheet "users" no Sheety:
-            // const response = await fetch(`${SHEETY_URL}/users`);
-            // const users = await response.json();
-            // const validUser = users.find(u => u.username === username && u.password === password);
-
-            // Por enquanto, exemplo básico:
             if (username === 'admin' && password === 'admin123') {
                 const userData = {
                     username,
                     role: 'admin',
-                    token: 'fake-jwt-token' // Em produção, viria da API
+                    token: 'fake-jwt-token'
                 };
                 setUser(userData);
                 localStorage.setItem('bookverse_user', JSON.stringify(userData));
@@ -70,7 +62,7 @@ export const AuthProvider = ({ children }) => {
             login,
             logout,
             loading,
-            isAuthenticated: !!user // Adicionei esta propriedade útil
+            isAuthenticated: !!user
         }}>
             {children}
         </AuthContext.Provider>

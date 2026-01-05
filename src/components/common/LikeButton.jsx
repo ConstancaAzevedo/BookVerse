@@ -16,11 +16,9 @@ function LikeButton({ commentId, userId}) {
     try {
       setLoading(true);
       
-      // Carregar contagem de likes
       const likesData = await likesApi.getCommentLikes(commentId);
       setLikesCount(likesData.count);
       
-      // Verificar se user já deu like
       if (userId) {
         const userHasLiked = await likesApi.hasUserLikedComment(commentId, userId);
         setHasLiked(userHasLiked);
@@ -57,7 +55,7 @@ function LikeButton({ commentId, userId}) {
   if (loading) {
     return (
       <button className="comment-like-button loading" disabled>
-        <span className="heart-icon">👍</span>
+        <span className="heart-icon"></span>
         <span className="like-count">...</span>
       </button>
     );

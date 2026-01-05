@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import './RatingStars.css';
 
-/*Avaliação com Estrelas*/
-
 function RatingStars({ initialRating = 0, onRate, readOnly = false, size = 'medium' }) {
   const [rating, setRating] = useState(initialRating);
   const [hoverRating, setHoverRating] = useState(0);

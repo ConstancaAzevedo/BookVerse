@@ -21,11 +21,10 @@ function BookDetail() {
         setLoading(true);
         setError('');
 
-        // Carregar livro - CORREÇÃO: usar bookApi.getBookById()
         const bookData = await bookApi.getBookById(id);
         setBook(bookData);
 
-        // Carregar contagem de comentários
+
         try {
           const comments = await commentApi.getCommentsByBook(id);
           setCommentsCount(comments.length);
@@ -60,7 +59,7 @@ function BookDetail() {
   if (error || !book) {
     return (
       <div className="book-detail-error">
-        <h2>📚 Livro Não Encontrado</h2>
+        <h2>Livro Não Encontrado</h2>
         <p>{error || 'O livro que procura não existe.'}</p>
         <button onClick={() => navigate('/')} className="back-home-btn">
           ← Voltar ao Catálogo
@@ -69,29 +68,29 @@ function BookDetail() {
     );
   }
 
-  // Calcular idade do livro
+
   const currentYear = new Date().getFullYear();
   const bookAge = currentYear - book.year;
 
   return (
     <div className="book-detail-container">
-      {/* Botão de voltar */}
+
       <div className="back-nav">
         <Link to="/" className="back-link">
           ← Voltar ao Catálogo
         </Link>
       </div>
 
-      {/* Conteúdo principal */}
+
       <div className="book-detail-content">
-        {/* Cabeçalho com breadcrumb */}
+
         <nav className="breadcrumb">
           <Link to="/">Catálogo</Link>
           <span> / </span>
           <span className="current">{book.title}</span>
         </nav>
 
-        {/* Informações do livro */}
+
         <div className="book-main-info">
           <div className="book-cover-large">
             <img
@@ -139,7 +138,6 @@ function BookDetail() {
               )}
             </div>
 
-            {/* Rating */}
             <div className="book-rating">
               <h3>Avaliação dos Leitores</h3>
               <div className="rating-container">
@@ -151,41 +149,38 @@ function BookDetail() {
               </div>
             </div>
 
-            {/* Ações */}
             <div className="book-actions">
               <button className="action-btn favorite-btn">
-                ⭐ Adicionar aos Favoritos
+                Adicionar aos Favoritos
               </button>
 
               <button className="action-btn share-btn">
-                📤 Partilhar
+                Partilhar
               </button>
 
               <Link to={`/admin`} className="action-btn edit-btn">
-                ✏️ Editar (Admin)
+                Editar (Admin)
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Descrição completa */}
         <div className="book-description-section">
-          <h3>📖 Sinopse</h3>
+          <h3>Sinopse</h3>
           <div className="book-description-full">
             {book.description ? (
               <p>{book.description}</p>
             ) : (
               <p className="no-description">
-                Este livro não tem descrição disponível.
+                Este livro não tem descrição disponível
               </p>
             )}
           </div>
         </div>
 
-        {/* Informações adicionais */}
         <div className="book-additional-info">
           <div className="info-card">
-            <h4>📊 Detalhes Técnicos</h4>
+            <h4>Detalhes Técnicos</h4>
             <ul>
               <li><strong>ID:</strong> #{book.id}</li>
               <li><strong>Autor:</strong> {book.author}</li>
@@ -197,7 +192,7 @@ function BookDetail() {
           </div>
 
           <div className="info-card">
-            <h4>🏷️ Palavras-chave</h4>
+            <h4>Palavras-chave</h4>
             <div className="tags">
               {book.genre && book.genre.split(' ').map((tag, index) => (
                 <span key={index} className="tag">{tag}</span>
@@ -209,23 +204,23 @@ function BookDetail() {
           </div>
         </div>
 
-        {/* Comentários */}
+
         <CommentSection bookId={id} />
 
-        {/* Livros similares */}
+
         {book && <SimilarBooks currentBook={book} />}
 
-        {/* Footer da página */}
+
         <div className="book-detail-footer">
           <p className="last-updated">
-            📅 Informação atualizada em {new Date().toLocaleDateString('pt-PT')}
+            Informação atualizada em {new Date().toLocaleDateString('pt-PT')}
           </p>
           <div className="footer-actions">
             <Link to="/" className="footer-link">
-              🔍 Ver mais livros
+              Ver mais livros
             </Link>
             <a href="#top" className="footer-link">
-              ⬆️ Voltar ao topo
+              Voltar ao topo
             </a>
           </div>
         </div>

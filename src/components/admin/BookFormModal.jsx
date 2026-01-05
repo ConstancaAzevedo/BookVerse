@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import './BookFormModal.css';
 
-/*Modal para Adicionar/Editar Livros*/
-
 function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
     year: new Date().getFullYear(),
+    pages: '',
     genre: 'Ficção',
     image: '',
     description: ''
@@ -16,7 +15,6 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Preencher formulário se estiver a editar
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -39,8 +37,7 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
       ...prev,
       [name]: value
     }));
-    
-    // Limpar erro do campo
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -49,25 +46,11 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.title.trim()) newErrors.title = 'Título é obrigatório';
-    if (!formData.author.trim()) newErrors.author = 'Autor é obrigatório';
-    if (!formData.year || formData.year < 1000 || formData.year > new Date().getFullYear() + 5) {
-      newErrors.year = 'Ano inválido';
-    }
-    if (!formData.genre.trim()) newErrors.genre = 'Género é obrigatório';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
@@ -81,14 +64,42 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
 
   if (!isOpen) return null;
 
+
+  const validateImageUrl = (url) => {
+    if (!url || url.trim() === '') return true; 
+
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.title.trim()) newErrors.title = 'Título é obrigatório';
+    if (!formData.author.trim()) newErrors.author = 'Autor é obrigatório';
+    if (!formData.year || formData.year < 1000 || formData.year > new Date().getFullYear() + 5) {
+      newErrors.year = 'Ano inválido';
+    }
+    if (formData.image && !validateImageUrl(formData.image)) {
+      newErrors.image = 'URL da imagem inválida';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
-          <h2>{isEditing ? '✏️ Editar Livro' : '➕ Adicionar Novo Livro'}</h2>
+          <h2>{isEditing ? 'Editar Livro' : 'Adicionar Novo Livro'}</h2>
           <button onClick={onClose} className="modal-close-btn">×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="book-form">
           <div className="form-grid">
             <div className="form-group">
@@ -104,7 +115,7 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
               />
               {errors.title && <span className="error-message">{errors.title}</span>}
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="author">Autor *</label>
               <input
@@ -118,7 +129,7 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
               />
               {errors.author && <span className="error-message">{errors.author}</span>}
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="year">Ano de Publicação *</label>
               <input
@@ -133,7 +144,21 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
               />
               {errors.year && <span className="error-message">{errors.year}</span>}
             </div>
-            
+            <div className="form-group">
+              <label htmlFor="pages">Número de Páginas</label>
+              <input
+                type="number"
+                id="pages"
+                name="pages"
+                value={formData.pages}
+                onChange={handleChange}
+                min="1"
+                placeholder="Ex: 320"
+                className={errors.pages ? 'error' : ''}
+              />
+              {errors.pages && <span className="error-message">{errors.pages}</span>}
+            </div>
+
             <div className="form-group">
               <label htmlFor="genre">Género *</label>
               <select
@@ -154,7 +179,7 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
               </select>
               {errors.genre && <span className="error-message">{errors.genre}</span>}
             </div>
-            
+
             <div className="form-group full-width">
               <label htmlFor="image">URL da Imagem</label>
               <input
@@ -169,7 +194,7 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
                 Deixe em branco para usar imagem padrão
               </small>
             </div>
-            
+
             <div className="form-group full-width">
               <label htmlFor="description">Descrição</label>
               <textarea
@@ -182,18 +207,18 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData, isEditing }) {
               />
             </div>
           </div>
-          
+
           <div className="form-actions">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={onClose}
               className="cancel-btn"
               disabled={isSubmitting}
             >
               Cancelar
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
               disabled={isSubmitting}
             >

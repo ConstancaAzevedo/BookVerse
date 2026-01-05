@@ -1,14 +1,12 @@
 import { Link } from 'react-router-dom';
 import './BookCard.css'; 
 
-/*Card Individual de Cada Livro*/
-
 function BookCard({ book }) {
   return (
     <div className="book-card">
-      <div className="book-image">
+      <div className="book-cover">
         <img 
-          src={book.image || 'https://via.placeholder.com/150x200?text=No+Image'} 
+          src={book.cover || 'https://via.placeholder.com/150x200?text=No+Image'} 
           alt={book.title}
           onError={(e) => {
             e.target.src = 'https://via.placeholder.com/150x200?text=No+Image';

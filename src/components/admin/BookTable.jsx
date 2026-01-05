@@ -1,6 +1,5 @@
 import './BookTable.css';
 
-/*Tabela de Livros para Admin*/
 
 function BookTable({ books, onEdit, onDelete, isLoading }) {
   if (isLoading) {
@@ -24,7 +23,7 @@ function BookTable({ books, onEdit, onDelete, isLoading }) {
       <table className="book-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th style={{ textAlign: 'center' }}>ID</th>
             <th>Capa</th>
             <th>Título</th>
             <th>Autor</th>
@@ -36,15 +35,21 @@ function BookTable({ books, onEdit, onDelete, isLoading }) {
         <tbody>
           {books.map((book) => (
             <tr key={book.id}>
-              <td className="book-id">#{book.id}</td>
+              <td className="book-id" style={{ textAlign: 'center' }}><div className="book-id-inner">#{book.id}</div></td>
               <td className="book-cover">
-                <img 
-                  src={book.image || 'https://via.placeholder.com/40x60/cccccc/ffffff?text=No+Img'} 
-                  alt={book.title}
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/40x60/cccccc/ffffff?text=No+Img';
-                  }}
-                />
+                {book.cover && book.cover.trim() !== '' ? (
+                  <img
+                    src={book.cover} 
+                    alt={book.title}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentNode.innerHTML = '<div class="no-image">No Img</div>';
+                    }}
+                  />
+                ) : (
+                  <div className="no-image">No Img</div>
+                )}
               </td>
               <td className="book-title">
                 <strong>{book.title}</strong>
@@ -58,26 +63,26 @@ function BookTable({ books, onEdit, onDelete, isLoading }) {
                 <span className="genre-badge">{book.genre}</span>
               </td>
               <td className="book-actions">
-                <button 
+                <button
                   onClick={() => onEdit(book)}
                   className="action-btn edit-btn"
                   title="Editar livro"
                 >
-                  ✏️ Editar
+                  Editar
                 </button>
-                <button 
+                <button
                   onClick={() => onDelete(book.id)}
                   className="action-btn delete-btn"
                   title="Eliminar livro"
                 >
-                  🗑️ Eliminar
+                  Eliminar
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      
+
       <div className="table-footer">
         <p>Total: <strong>{books.length}</strong> livros</p>
       </div>

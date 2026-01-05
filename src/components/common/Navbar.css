@@ -71,14 +71,15 @@
   align-items: center;
   gap: 30px;
   flex: 1;
-  justify-content: flex-end; /* ← Alinha tudo à direita */
+  justify-content: flex-end;
+  padding: 15px;
 }
 
 .navbar-links {
   display: flex;
   gap: 15px;
   align-items: center;
-  margin-right: auto; /* ← Empurra os links para a esquerda */
+  margin-right: auto;
 }
 
 .nav-link {
@@ -103,18 +104,6 @@
   gap: 10px;
 }
 
-.action-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  font-size: 0.95rem;
-  display: inline-block !important;
-}
-
 .login-btn {
   background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   color: white;
@@ -127,23 +116,14 @@
 }
 
 .admin-btn {
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-  color: white;
+  background-color: white;
+  color: black;
 }
 
-.admin-btn:hover {
-  background: linear-gradient(135deg, #2980b9 0%, #1c6ea4 100%);
-  transform: translateY(-2px);
-}
 
 .logout-btn {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-  color: white;
-}
-
-.logout-btn:hover {
-  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-  transform: translateY(-2px);
+  background-color: white;
+  color: black;
 }
 
 .user-menu {
@@ -152,7 +132,7 @@
   align-items: center;
 }
 
-/* Responsividade */
+
 @media (max-width: 1024px) {
   .navbar-container {
     padding: 0 15px;
@@ -172,7 +152,7 @@
   }
 }
 
-/* MOBILE */
+
 @media (max-width: 768px) {
   .menu-toggle {
     display: block;
@@ -243,4 +223,36 @@
     width: 35px;
     height: 35px;
   }
+
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-size: 0.95rem;
+  background: transparent;
+  color: inherit;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-btn.small {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
 }

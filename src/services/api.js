@@ -1,6 +1,5 @@
 import { SHEETY_CONFIG } from './sheetyConfig';
 
-
 const SHEETY_API_ID = SHEETY_CONFIG.PROJECT_ID;
 const SHEETY_PROJECT = SHEETY_CONFIG.PROJECT_NAME;
 const BASE_URL = SHEETY_CONFIG.API_BASE;
@@ -9,11 +8,33 @@ const headers = {
   'Authorization': `Bearer ${SHEETY_CONFIG.API_KEY}`
 };
 
-// Função auxiliar para transformar dados do Sheety
+const requestCache = new Map();
+
+
+const cachedFetch = async (url, options = {}) => {
+  const cacheKey = `${url}${JSON.stringify(options)}`;
+
+  if (requestCache.has(cacheKey)) {
+    console.log(`[CACHE] ${url}`);
+    return requestCache.get(cacheKey);
+  }
+
+  console.log(`🔄 [FETCH] ${url}`);
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    requestCache.set(cacheKey, data);
+    return data;
+  } catch (error) {
+    console.error(` Erro em ${url}:`, error);
+    throw error;
+  }
+};
+
 const transformBookFromSheety = (sheetyBook) => {
   return {
-    id: sheetyBook.id - 1, // ID do sistema (1, 2, 3...)
-    sheetyId: sheetyBook.id, // ID original do Sheety (2, 3, 4...)
+    id: sheetyBook.id - 1,
+    sheetyId: sheetyBook.id,
     title: sheetyBook.title,
     author: sheetyBook.author,
     description: sheetyBook.description,
@@ -26,50 +47,55 @@ const transformBookFromSheety = (sheetyBook) => {
   };
 };
 
-// API DE LIVROS
+
 export const bookApi = {
-  getBooks: async (page = 1, limit = 10, search = "") => {
+  getBooks: async (page = 1, limit = 6, search = "") => {
     try {
-      const response = await fetch(`${BASE_URL}/books`, { headers });
-      const data = await response.json();
+      const data = await cachedFetch(`${BASE_URL}/books`, { headers });
       const allBooks = data.books.map(transformBookFromSheety);
 
       let filteredBooks = allBooks;
 
-      // Filtrar se houver pesquisa
       if (search && search.trim() !== "") {
         const term = search.trim();
 
-        // Função para remover acentos e converter para minúsculas
         const normalizarTexto = (texto) => {
-          if (!texto || typeof texto !== 'string') return '';
-          return texto
-            .normalize('NFD') // Separa caracteres base de acentos
-            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+          if (texto == null) return '';
+          const textoString = String(texto);
+          return textoString
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
             .toLowerCase();
         };
 
-        // Normaliza o termo de pesquisa (remove acentos)
+        const termoOriginal = term.toLowerCase();
         const termoNormalizado = normalizarTexto(term);
 
         filteredBooks = filteredBooks.filter(book => {
-          // Valores seguros (strings vazias se não existir)
-          const titulo = book.title || "";
-          const autor = book.author || "";
-          const genero = book.genre || "";
+          const titulo = String(book.title || "");
+          const autor = String(book.author || "");
+          const genero = String(book.genre || "");
+          const ano = String(book.year || "");
 
-          // Normaliza os campos do livro (remove acentos)
           const tituloNormalizado = normalizarTexto(titulo);
           const autorNormalizado = normalizarTexto(autor);
           const generoNormalizado = normalizarTexto(genero);
+          const tituloOriginal = titulo.toLowerCase();
+          const anoString = ano;
 
-          // Pesquisa APENAS em título, autor e género
           return (
             tituloNormalizado.includes(termoNormalizado) ||
+            tituloOriginal.includes(termoOriginal) ||
             autorNormalizado.includes(termoNormalizado) ||
-            generoNormalizado.includes(termoNormalizado)
+            autor.toLowerCase().includes(termoOriginal) ||
+            generoNormalizado.includes(termoNormalizado) ||
+            genero.toLowerCase().includes(termoOriginal) ||
+            anoString.includes(termoOriginal) ||
+            titulo.includes(term)
           );
         });
+
+        console.log(`Pesquisa por "${term}": ${filteredBooks.length} resultados`);
 
         return {
           data: filteredBooks,
@@ -80,7 +106,6 @@ export const bookApi = {
         };
       }
 
-      // Paginação (sem pesquisa)
       const start = (page - 1) * limit;
       const end = start + limit;
       const paginatedBooks = filteredBooks.slice(start, end);
@@ -94,87 +119,76 @@ export const bookApi = {
 
     } catch (error) {
       console.error("Erro na API:", error);
+      return { data: [], total: 0, page: 1, totalPages: 1 };
+    }
+  },
+
+  getAllBooksForAdmin: async () => {
+    try {
+      console.log("API: Buscando TODOS os livros para admin");
+      const data = await cachedFetch(`${BASE_URL}/books`, { headers });
+
+      if (!data.books) {
+        console.error(" data.books não existe:", data);
+        return { data: [], total: 0 };
+      }
+
+      const allBooks = data.books.map(transformBookFromSheety);
+      console.log(`API: Encontrados ${allBooks.length} livros para admin`);
+
       return {
-        data: [],
-        total: 0,
-        page: 1,
-        totalPages: 1
+        data: allBooks,
+        total: allBooks.length
       };
+
+    } catch (error) {
+      console.error(" Erro no getAllBooksForAdmin:", error);
+      return { data: [], total: 0 };
     }
   },
 
   getBookById: async (bookId) => {
     try {
-      console.log(`🔍 getBookById CHAMADO com:`, bookId);
-      console.log(`🔍 Tipo de bookId:`, typeof bookId);
-      console.log(`🔍 bookId toString:`, String(bookId));
+      console.log(`getBookById CHAMADO com:`, bookId);
 
-      // Se bookId for um objeto, tenta extrair o ID
       let actualBookId = bookId;
       if (typeof bookId === 'object' && bookId !== null) {
-        console.log(`⚠️ bookId é objeto! Extraindo...`, bookId);
         actualBookId = bookId.id || bookId._id || bookId.bookId;
-        console.log(`🔄 ID extraído:`, actualBookId);
       }
 
-      // Converte para número
       actualBookId = parseInt(actualBookId);
 
       if (isNaN(actualBookId)) {
-        console.error(`❌ bookId inválido:`, bookId);
         throw new Error(`ID de livro inválido: ${bookId}`);
       }
 
-      console.log(`🔍 Buscando livro ID numérico ${actualBookId}...`);
-
-      // 1. Primeiro busca TODOS os livros
-      const response = await fetch(`${BASE_URL}/books`, { headers });
-      const data = await response.json();
-
-      console.log(`📊 Total de livros disponíveis:`, data.books?.length || 0);
+      console.log(`Buscando livro ID ${actualBookId}...`);
+      const data = await cachedFetch(`${BASE_URL}/books`, { headers });
 
       if (!data.books || data.books.length === 0) {
         throw new Error('Nenhum livro encontrado na API');
       }
 
-      // 2. Encontra o livro pelo ID correto
-      // CORREÇÃO: Use actualBookId, não bookId!
-      let foundBook = null;
-
-      if (data.books) {
-        // A: Busca pelo ID do sistema (subtraindo 1 do ID do Sheety)
-        foundBook = data.books.find(b => (b.id - 1) == actualBookId); // <-- CORREÇÃO AQUI
-
-        // B: Se não encontrar, tenta buscar pelo ID do Sheety diretamente
-        if (!foundBook) {
-          console.log(`🔄 Tentando buscar pelo ID do Sheety: ${actualBookId}`);
-          foundBook = data.books.find(b => b.id == actualBookId);
-        }
-      }
-
-      console.log(`🔍 Livro encontrado:`, foundBook);
+      let foundBook = data.books.find(b => (b.id - 1) == actualBookId);
 
       if (!foundBook) {
-        console.error(`❌ Livro ID ${actualBookId} não encontrado. Livros disponíveis:`,
-          data.books?.map(b => ({
-            sheetyId: b.id,
-            systemId: b.id - 1,  // ID do sistema
-            title: b.title
-          })));
+        foundBook = data.books.find(b => b.id == actualBookId);
+      }
+
+      if (!foundBook) {
         throw new Error(`Livro ID ${actualBookId} não encontrado`);
       }
 
       return transformBookFromSheety(foundBook);
     } catch (error) {
-      console.error('❌ Erro ao buscar livro:', error);
+      console.error('Erro ao buscar livro:', error);
       throw error;
     }
   },
 
   getAllBooks: async () => {
     try {
-      const response = await fetch(`${BASE_URL}/books`, { headers });
-      const data = await response.json();
+      const data = await cachedFetch(`${BASE_URL}/books`, { headers });
       return data.books.map(transformBookFromSheety);
     } catch (error) {
       console.error("Erro ao buscar todos os livros:", error);
@@ -204,6 +218,7 @@ export const bookApi = {
 
       const data = await response.json();
       return transformBookFromSheety(data.book);
+
     } catch (error) {
       console.error("Erro ao criar livro:", error);
       throw error;
@@ -224,14 +239,40 @@ export const bookApi = {
         year: bookData.year?.toString() || '0'
       };
 
-      const response = await fetch(`${BASE_URL}/books/${id}`, {
+
+
+      const allBooksData = await fetch(`${BASE_URL}/books`, { headers });
+      const allBooks = await allBooksData.json();
+
+      const targetBook = allBooks.books.find(book => (book.id - 1) === id);
+
+      if (!targetBook) {
+        throw new Error(`Livro com ID interno ${id} não encontrado`);
+      }
+
+      const sheetyId = targetBook.id;
+
+      console.log(`Atualizando livro: ID interno=${id}, Sheety ID=${sheetyId}`);
+
+
+      const response = await fetch(`${BASE_URL}/books/${sheetyId}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ book: sheetyBook })
       });
 
       const data = await response.json();
+
+
+      const cacheKeys = Array.from(requestCache.keys());
+      cacheKeys.forEach(key => {
+        if (key.includes('/books')) {
+          requestCache.delete(key);
+        }
+      });
+
       return transformBookFromSheety(data.book);
+
     } catch (error) {
       console.error("Erro ao atualizar livro:", error);
       throw error;
@@ -239,37 +280,37 @@ export const bookApi = {
   },
 
   deleteBook: async (id) => {
-    try {
-      const response = await fetch(`${BASE_URL}/books/${id}`, {
-        method: 'DELETE',
-        headers
-      });
 
-      await response.json();
-      return { success: true, message: 'Livro eliminado com sucesso' };
-    } catch (error) {
-      console.error("Erro ao eliminar livro:", error);
-      throw error;
-    }
+    const sheetyId = Number(id) + 1;
+
+    console.log(`🗑️ Eliminando: ID interno ${id} → Sheety ID ${sheetyId}`);
+
+    await fetch(`${BASE_URL}/books/${sheetyId}`, {
+      method: 'DELETE',
+      headers
+    });
+
+    requestCache.clear();
+    return { success: true };
   }
 };
 
-// API DE COMENTÁRIOS
+
+
+
 export const commentApi = {
   getCommentsByBook: async (bookId) => {
     try {
-      const response = await fetch(`${BASE_URL}/comments`, { headers });
-      const data = await response.json();
+      const data = await cachedFetch(`${BASE_URL}/comments`, { headers });
       const allComments = data.comments || [];
 
       const numericBookId = parseInt(bookId);
 
-      // Comentários usam IDs do sistema (1, 2, 3...) - subtraindo 1 do ID do Sheety
       const bookComments = allComments
         .filter(comment => parseInt(comment.bookId) === numericBookId)
         .map(comment => ({
-          id: parseInt(comment.id) - 1, // ⬅️ AQUI: Sistema ID = Sheety ID - 1
-          sheetyId: parseInt(comment.id), // ⬅️ ID original do Sheety
+          id: parseInt(comment.id) - 1,
+          sheetyId: parseInt(comment.id),
           bookId: parseInt(comment.bookId),
           user: comment.user,
           text: comment.text,
@@ -288,34 +329,25 @@ export const commentApi = {
 
   addComment: async (commentData) => {
     try {
-      console.log("🔍 DEBUG: Iniciando addComment");
-      console.log("🔍 DEBUG: Dados recebidos:", commentData);
+      console.log("DEBUG: Iniciando addComment");
 
-      // 1. Buscar TODOS os comentários para calcular próximo ID
-      const getAllResponse = await fetch(`${BASE_URL}/comments`, { headers });
-      const allData = await getAllResponse.json();
+
+      const allData = await cachedFetch(`${BASE_URL}/comments`, { headers });
       const allComments = allData.comments || [];
 
-      // Calcular próximo ID do Sheety (não do sistema)
       let nextSheetyId = 1;
       if (allComments.length > 0) {
-        const sheetyIds = allComments.map(c => parseInt(c.id || c.Id || c.ID || 0));
+        const sheetyIds = allComments.map(c => parseInt(c.id || 0));
         const maxSheetyId = Math.max(...sheetyIds.filter(id => !isNaN(id)));
         nextSheetyId = maxSheetyId + 1;
       }
 
-      // ID do sistema será nextSheetyId - 1
       const systemId = nextSheetyId - 1;
-
-      console.log(`🔢 Próximo ID Sheety: ${nextSheetyId}, ID Sistema: ${systemId}`);
-
-      // 2. Garantir data atual
       const today = new Date().toISOString().split('T')[0];
 
-      // 3. Estrutura para o Sheety
       const payload = {
         comment: {
-          id: nextSheetyId.toString(), // ID do Sheety
+          id: nextSheetyId.toString(),
           bookId: commentData.bookId.toString(),
           user: commentData.user || commentData.userName || "Anónimo",
           text: commentData.text || "",
@@ -324,7 +356,8 @@ export const commentApi = {
         }
       };
 
-      console.log("📤 Enviando dados:", payload);
+      console.log("Enviando dados:", payload);
+
 
       const response = await fetch(`${BASE_URL}/comments`, {
         method: 'POST',
@@ -338,13 +371,13 @@ export const commentApi = {
       }
 
       const data = await response.json();
-      console.log("✅ Comentário adicionado:", data);
 
-      // Retornar com ID do sistema
+      console.log("Comentário adicionado:", data);
+
       const returnedComment = data.comment || data;
       return {
-        id: systemId, // ⬅️ ID do sistema
-        sheetyId: nextSheetyId, // ⬅️ ID do Sheety
+        id: systemId,
+        sheetyId: nextSheetyId,
         bookId: parseInt(returnedComment.bookId || commentData.bookId),
         user: returnedComment.user || commentData.user,
         text: returnedComment.text || commentData.text,
@@ -353,86 +386,42 @@ export const commentApi = {
       };
 
     } catch (error) {
-      console.error("❌ ERRO CRÍTICO em addComment:", error);
+      console.error(" ERRO CRÍTICO em addComment:", error);
       throw error;
     }
   }
 };
 
-// Funções auxiliares mantêm compatibilidade
-export const getBookById = async (bookId) => {
-  return await bookApi.getBookById(bookId);
-};
 
-//API DE LIVROS SIMILARES
-export const getSimilarBooks = async (bookId) => {
-  try {
-    console.log(`🔍 Buscando livros similares para ID ${bookId}...`);
-
-    const currentBook = await bookApi.getBookById(bookId);
-    const allBooks = await bookApi.getAllBooks();
-
-    const similar = allBooks
-      .filter(book =>
-        book.id !== bookId &&
-        book.genre === currentBook.genre
-      )
-      .slice(0, 3);
-
-    console.log(`✅ Encontrados ${similar.length} livros similares`);
-    return similar;
-  } catch (error) {
-    console.error('❌ Erro ao buscar livros similares:', error);
-    return [];
-  }
-};
-
-
-// API DE LIKES EM COMENTÁRIOS
 export const likesApi = {
-  // Dar like a um comentário
   likeComment: async (commentId, userId) => {
     try {
-      console.log("❤️ Tentando dar like ao comentário:", commentId, "userId:", userId);
+      console.log("Tentando dar like ao comentário:", commentId);
 
-      // 1. PRIMEIRO: Buscar o próximo ID disponível
+
+      const data = await cachedFetch(`${BASE_URL}/commentLikes`, { headers });
+      const allLikes = data.commentLikes || [];
+
       let nextId = 1;
-      try {
-        const response = await fetch(`${BASE_URL}/commentLikes`, { headers });
-        if (response.ok) {
-          const data = await response.json();
-          const allLikes = data.commentLikes || [];
-
-          if (allLikes.length > 0) {
-            // Encontrar o maior ID existente
-            const ids = allLikes
-              .map(like => parseInt(like.id || 0))
-              .filter(id => !isNaN(id) && id > 0);
-
-            if (ids.length > 0) {
-              nextId = Math.max(...ids) + 1;
-            }
-          }
+      if (allLikes.length > 0) {
+        const ids = allLikes.map(like => parseInt(like.id || 0)).filter(id => !isNaN(id) && id > 0);
+        if (ids.length > 0) {
+          nextId = Math.max(...ids) + 1;
         }
-      } catch (error) {
-        console.warn("⚠️ Não foi possível buscar IDs existentes, usando ID 1", error);
       }
 
-      console.log(`🔢 Próximo ID para like: ${nextId}`);
-
       const dataValue = new Date().toISOString();
-
-      // ⭐⭐ ENVIAR O ID EXPLICITAMENTE ⭐⭐
       const payload = {
         commentLike: {
-          id: nextId.toString(),      // ⬅️ ADICIONAR ID AQUI!
+          id: nextId.toString(),
           commentId: commentId.toString(),
           userId: userId.toString(),
           data: dataValue
         }
       };
 
-      console.log("📤 Enviando dados:", payload);
+      console.log("Enviando dados:", payload);
+
 
       const response = await fetch(`${BASE_URL}/commentLikes`, {
         method: 'POST',
@@ -440,123 +429,78 @@ export const likesApi = {
         body: JSON.stringify(payload)
       });
 
-      console.log("📡 Status:", response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Erro ${response.status}: ${errorText}`);
       }
 
-      const data = await response.json();
-      console.log("✅ Like adicionado:", data);
-      return data;
+      const result = await response.json();
+      console.log("Like adicionado:", result);
+      return result;
 
     } catch (error) {
-      console.error("❌ Erro ao dar like:", error);
+      console.error("Erro ao dar like:", error);
       throw error;
     }
   },
 
-
-  // Remover like de um comentário
   unlikeComment: async (commentId, userId) => {
     try {
-      console.log("🚫 Tentando remover like do comentário:", commentId);
+      console.log("Tentando remover like do comentário:", commentId);
 
-      const response = await fetch(`${BASE_URL}/commentLikes`, { headers });
 
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar likes: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("📊 Likes existentes:", data);
-
+      const data = await cachedFetch(`${BASE_URL}/commentLikes`, { headers });
       const allLikes = data.commentLikes || [];
 
-      // Converter commentId do sistema para Sheety se necessário
-      const sheetyCommentId = parseInt(commentId) + 1; // Se usar sistema de IDs
-
-      // Encontrar like deste user para este comentário
+      const sheetyCommentId = parseInt(commentId) + 1;
       const userLike = allLikes.find(like =>
         like &&
-        (parseInt(like.commentId) === parseInt(commentId) || // ID sistema
-          parseInt(like.commentId) === sheetyCommentId) && // OU ID Sheety
+        (parseInt(like.commentId) === parseInt(commentId) ||
+          parseInt(like.commentId) === sheetyCommentId) &&
         like.userId === userId.toString()
       );
 
-      console.log("🔍 Like encontrado para eliminar:", userLike);
-
       if (userLike && userLike.id) {
-        // Eliminar o like encontrado
+
         const deleteResponse = await fetch(`${BASE_URL}/commentLikes/${userLike.id}`, {
           method: 'DELETE',
           headers
         });
 
-        console.log("✅ Like removido, status:", deleteResponse.status);
-        return await deleteResponse.json();
+        const result = await deleteResponse.json();
+        console.log("Like removido:", result);
+        return result;
       }
 
       return { success: false, message: 'Like não encontrado' };
 
     } catch (error) {
-      console.error("❌ Erro ao remover like do comentário:", error);
+      console.error("Erro ao remover like:", error);
       throw error;
     }
   },
 
-  // Contar likes de um comentário
   getCommentLikes: async (commentId) => {
     try {
-      console.log("🔢 Contando likes do comentário:", commentId);
-
-      const response = await fetch(`${BASE_URL}/commentLikes`, { headers });
-
-      if (!response.ok) {
-        console.log("⚠️ Não foi possível buscar likes, assumindo 0");
-        return { count: 0, likes: [] };
-      }
-
-      const data = await response.json();
-      console.log("📊 Resposta completa:", data);
-
-      // Estrutura correta: { commentLikes: [...] }
+      const data = await cachedFetch(`${BASE_URL}/commentLikes`, { headers });
       const allLikes = data.commentLikes || [];
 
-      // Filtrar likes deste comentário
       const commentLikes = allLikes.filter(like =>
         like && parseInt(like.commentId) === parseInt(commentId)
       );
 
-      console.log(`✅ ${commentLikes.length} likes para comentário ${commentId}`);
-
-      return {
-        count: commentLikes.length,
-        likes: commentLikes
-      };
+      console.log(`${commentLikes.length} likes para comentário ${commentId}`);
+      return { count: commentLikes.length, likes: commentLikes };
 
     } catch (error) {
-      console.error("❌ Erro ao contar likes do comentário:", error);
+      console.error("Erro ao contar likes:", error);
       return { count: 0, likes: [] };
     }
   },
 
-  // Verificar se user já deu like ao comentário
   hasUserLikedComment: async (commentId, userId) => {
     try {
-      console.log("🔍 Verificando se user", userId, "deu like ao comentário", commentId);
-
-      const response = await fetch(`${BASE_URL}/commentLikes`, { headers });
-
-      if (!response.ok) {
-        console.log("⚠️ Não foi possível verificar likes");
-        return false;
-      }
-
-      const data = await response.json();
-
-      // Estrutura correta
+      const data = await cachedFetch(`${BASE_URL}/commentLikes`, { headers });
       const allLikes = data.commentLikes || [];
 
       const userLike = allLikes.find(like =>
@@ -566,21 +510,18 @@ export const likesApi = {
       );
 
       const hasLiked = !!userLike;
-      console.log("✅ User já deu like?", hasLiked);
-
+      console.log(`User ${userId} já deu like? ${hasLiked}`);
       return hasLiked;
 
     } catch (error) {
-      console.error("❌ Erro ao verificar like do comentário:", error);
+      console.error(" Erro ao verificar like:", error);
       return false;
     }
   },
 
-  // Toggle like em comentário
   toggleCommentLike: async (commentId, userId) => {
     try {
       console.log("🔄 Alternando like para comentário:", commentId);
-
       const hasLiked = await likesApi.hasUserLikedComment(commentId, userId);
 
       if (hasLiked) {
@@ -591,9 +532,34 @@ export const likesApi = {
         return await likesApi.likeComment(commentId, userId);
       }
     } catch (error) {
-      console.error("❌ Erro no toggle:", error);
+      console.error(" Erro no toggle:", error);
       throw error;
     }
   }
 };
 
+export const getBookById = async (bookId) => {
+  return await bookApi.getBookById(bookId);
+};
+
+export const getSimilarBooks = async (bookId) => {
+  try {
+    console.log(`🔍 Buscando livros similares para ID ${bookId}...`);
+    const currentBook = await bookApi.getBookById(bookId);
+    const allBooks = await bookApi.getAllBooks();
+
+    const similar = allBooks
+      .filter(book => book.id !== bookId && book.genre === currentBook.genre)
+      .slice(0, 3);
+
+    console.log(`Encontrados ${similar.length} livros similares`);
+    return similar;
+  } catch (error) {
+    console.error('Erro ao buscar livros similares:', error);
+    return [];
+  }
+};
+
+export const livrosService = {
+  getAll: bookApi.getAllBooks
+};

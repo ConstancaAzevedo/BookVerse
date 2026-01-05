@@ -4,7 +4,6 @@ import RatingStars from '../common/RatingStars';
 import './CommentSection.css';
 import LikeButton from '../common/LikeButton';
 
-/*Secção de Comentários*/
 
 function CommentSection({ bookId }) {
   const [comments, setComments] = useState([]);
@@ -13,12 +12,10 @@ function CommentSection({ bookId }) {
   const [userId, setUserId] = useState('');
 
   useEffect(() => {
-  // Gerar ou recuperar userId
   const generateUserId = () => {
     let storedId = localStorage.getItem('commentUserId');
     
     if (!storedId) {
-      // Criar ID único
       storedId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       localStorage.setItem('commentUserId', storedId);
     }
@@ -29,8 +26,6 @@ function CommentSection({ bookId }) {
   generateUserId();
 }, []);
 
-
-  // Form state
   const [newComment, setNewComment] = useState({
     name: '',
     email: '',
@@ -79,12 +74,11 @@ function CommentSection({ bookId }) {
         user: newComment.name,
         text: newComment.text,
         rating: newComment.rating,
-        date: new Date().toISOString().split('T')[0] // data atual
+        date: new Date().toISOString().split('T')[0]
       };
 
       await commentApi.addComment(commentToSubmit);
 
-      // Reset form
       setNewComment({
         name: '',
         email: '',
@@ -93,9 +87,8 @@ function CommentSection({ bookId }) {
       });
 
       setSubmitSuccess(true);
-      loadComments(); // Recarregar comentários
+      loadComments(); 
 
-      // esconder mensagem de sucesso após 3 segundos
       setTimeout(() => setSubmitSuccess(false), 3000);
     } catch (error) {
       console.error("Erro ao enviar comentário", error);
@@ -113,7 +106,6 @@ function CommentSection({ bookId }) {
     return new Date(dateString).toLocaleDateString('pt-PT', options);
   };
 
-  // Calcular rating médio
   const averageRating = comments.length > 0
     ? (comments.reduce((sum, comment) => sum + (comment.rating || 0), 0) / comments.length).toFixed(1)
     : 0;
@@ -121,7 +113,7 @@ function CommentSection({ bookId }) {
   return (
     <div className="comment-section">
       <div className="comment-header">
-        <h3>💬 Comentários dos Leitores</h3>
+        <h3>Comentários dos Leitores</h3>
         <div className="comment-stats">
           <span className="comment-count">{comments.length} comentários</span>
           {averageRating > 0 && (
@@ -133,7 +125,6 @@ function CommentSection({ bookId }) {
         </div>
       </div>
 
-      {/* Formulário para novo comentário */}
       <div className="comment-form-container">
         <h4>Deixe o seu comentário</h4>
         <form onSubmit={handleSubmit} className="comment-form">
@@ -184,7 +175,7 @@ function CommentSection({ bookId }) {
           {error && <div className="error-message">{error}</div>}
           {submitSuccess && (
             <div className="success-message">
-              ✅ O seu comentário foi publicado com sucesso!
+              O seu comentário foi publicado com sucesso!
             </div>
           )}
 
@@ -198,7 +189,6 @@ function CommentSection({ bookId }) {
         </form>
       </div>
 
-      {/* Lista de comentários */}
       <div className="comments-list">
         {loading ? (
           <div className="loading-comments">
@@ -221,7 +211,6 @@ function CommentSection({ bookId }) {
                   )}
                   <span className="comment-date">{formatDate(comment.date)}</span>
 
-                  {/* Botão de Like para o comentário */}
                   <LikeButton 
                     commentId={comment.id} 
                     userId={userId} />

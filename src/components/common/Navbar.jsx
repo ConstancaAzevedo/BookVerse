@@ -20,7 +20,6 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* Logo/Brand */}
         <div className="navbar-brand">
           <Link to="/" className="navbar-logo">
             <img
@@ -33,7 +32,6 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* Menu Mobile Toggle */}
         <button
           className="menu-toggle"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -42,7 +40,7 @@ function Navbar() {
           {isMenuOpen ? '✕' : '☰'}
         </button>
 
-        {/* Menu Items */}
+
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           <div className="navbar-links">
             <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>
@@ -66,7 +64,6 @@ function Navbar() {
           </a>
         </div>
 
-        {/* User Actions */}
         <div className="navbar-actions">
           {isLoggedIn ? (
             <div className="user-menu">
