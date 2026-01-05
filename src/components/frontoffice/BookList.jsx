@@ -13,6 +13,7 @@ function BookList() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalBooks, setTotalBooks] = useState(0);
+  const [sortBy, setSortBy] = useState('title-asc'); // NOVO: state para ordenação
 
   const booksPerPage = 6;
 
@@ -20,37 +21,43 @@ function BookList() {
     loadBooks();
   }, [currentPage, searchTerm]);
 
+  // função para ordenar os livros
+  const sortedBooks = [...books].sort((a, b) => {
+    // Garantir que temos strings válidas
+    const titleA = String(a?.title || '').toLowerCase();
+    const titleB = String(b?.title || '').toLowerCase();
+    const yearA = Number(a?.year) || 0;
+    const yearB = Number(b?.year) || 0;
+    const ratingA = Number(a?.rating) || 0;
+    const ratingB = Number(b?.rating) || 0;
+
+    switch (sortBy) {
+      case 'title-asc': return titleA.localeCompare(titleB);
+      case 'title-desc': return titleB.localeCompare(titleA);
+      case 'year-desc': return yearB - yearA;
+      case 'year-asc': return yearA - yearB;
+      case 'rating-desc': return ratingB - ratingA;
+      default: return 0;
+    }
+  });
+
+  // calcular livros para a página atual (dos ordenados)
+  const startIndex = (currentPage - 1) * booksPerPage;
+  const endIndex = startIndex + booksPerPage;
+  const paginatedBooks = sortedBooks.slice(startIndex, endIndex);
+
   const loadBooks = async () => {
     try {
       console.log('🔄 [BookList DEBUG] Iniciando loadBooks...');
-      console.log('🔄 [BookList DEBUG] Parâmetros:', {
-        page: searchTerm ? 1 : currentPage,
-        limit: booksPerPage,
-        search: searchTerm
-      });
 
       setLoading(true);
       setError(null);
 
-      console.log('📤 [BookList DEBUG] Chamando bookApi.getBooks()...');
       const result = await bookApi.getBooks(
         searchTerm ? 1 : currentPage,
         booksPerPage,
         searchTerm
       );
-
-      console.log('✅ [BookList DEBUG] Resposta recebida:', result);
-      console.log('📊 [BookList DEBUG] Estrutura da resposta:', {
-        hasData: !!result.data,
-        dataIsArray: Array.isArray(result.data),
-        dataLength: result.data ? result.data.length : 0,
-        total: result.total,
-        totalPages: result.totalPages
-      });
-
-      if (result.data && Array.isArray(result.data)) {
-        console.log('📚 [BookList DEBUG] Primeiro livro:', result.data[0]);
-      }
 
       setBooks(result.data);
 
@@ -62,33 +69,19 @@ function BookList() {
         setTotalBooks(result.total);
       }
 
-      console.log('✅ [BookList DEBUG] State atualizado:', {
-        booksCount: result.data.length,
-        totalBooks: searchTerm ? result.data.length : result.total,
-        totalPages: searchTerm ? 1 : result.totalPages
-      });
-
     } catch (error) {
       console.error('❌ [BookList DEBUG] Erro capturado:', error);
-      console.error('❌ [BookList DEBUG] Error details:', {
-        message: error.message,
-        stack: error.stack
-      });
-
       setError("Erro ao carregar livros. Verifique se a API está em execução.");
-      console.error("Erro na API:", error);
     } finally {
       setLoading(false);
-      console.log('🏁 [BookList DEBUG] Loading finalizado');
     }
   };
 
   const handleSearch = async (term) => {
     setSearchTerm(term);
-    setCurrentPage(1); // ← IMPORTANTE: Resetar para página 1 ao pesquisar
+    setCurrentPage(1);
 
     if (!term.trim()) {
-      // Se busca vazia, carrega todos
       loadBooks();
       return;
     }
@@ -113,6 +106,25 @@ function BookList() {
 
       <div className="search-section">
         <SearchBar onSearch={handleSearch} initialValue={searchTerm} />
+
+        {/* NOVO: Dropdown de ordenação */}
+        <div className="sort-container">
+          <label htmlFor="sort-select" className="sort-label">
+            Ordenar por:
+          </label>
+          <select
+            id="sort-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="sort-select"
+          >
+            <option value="title-asc">Título (A-Z)</option>
+            <option value="title-desc">Título (Z-A)</option>
+            <option value="year-desc">Ano (Mais Recente)</option>
+            <option value="year-asc">Ano (Mais Antigo)</option>
+            <option value="rating-desc">Melhor Avaliado</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (
@@ -133,7 +145,7 @@ function BookList() {
             {searchTerm
               ? `Nenhum livro encontrado para "${searchTerm}"`
               : "Nenhum livro disponível no momento."}
-        </p>
+          </p>
           {searchTerm && (
             <button
               onClick={() => handleSearch("")}
@@ -145,8 +157,9 @@ function BookList() {
         </div>
       ) : (
         <>
+          {/* ALTERADO: Usar paginatedBooks em vez de books */}
           <div className="books-grid">
-            {books.map((book) => (
+            {paginatedBooks.map((book) => (
               <BookCard key={book.id} book={book} />
             ))}
           </div>
@@ -163,12 +176,12 @@ function BookList() {
 
       <div className="stats-footer">
         <p>
-          Mostrando {books.length} de {totalBooks} livros
+          Mostrando {paginatedBooks.length} de {totalBooks} livros
           {searchTerm && ` para "${searchTerm}"`}
         </p>
       </div>
     </div>
   );
-} 
+}
 
 export default BookList;

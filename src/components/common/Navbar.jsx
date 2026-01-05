@@ -72,7 +72,7 @@ function Navbar() {
               </div>
             ) : (
               <button onClick={handleLogin} className="action-btn login-btn">
-                🔐 Login Admin
+                Login Admin
               </button>
             )}
           </div>

@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import BookDetail from './pages/BookDetail';
 import Login from './components/admin/Login';
 import Admin from './pages/Admin';
+import ScrollToTop from './components/common/ScrollToTop';
 import './App.css';
 
 function App() {
@@ -14,7 +15,7 @@ function App() {
     <Router>
       <AuthProvider>
         <Navbar />
-        
+
         <div className="App-content">
           <Routes>
             {/* Rotas públicas */}
@@ -22,7 +23,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/book/:id" element={<BookDetail />} />
             <Route path="/login" element={<Login />} />
-            
+
             {/* Rota protegida - Admin */}
             <Route path="/admin" element={
               <ProtectedRoute>
@@ -32,10 +33,11 @@ function App() {
                 }} />
               </ProtectedRoute>
             } />
-            
+
             {/* Rota catch-all */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
+          <ScrollToTop />
         </div>
       </AuthProvider>
     </Router>
